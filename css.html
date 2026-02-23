@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@uistate/css — API Reference</title>
+  <title>@everystate/css API Reference</title>
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
 </head>
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">UIstate</a>
+  <a href="/" class="logo">ever</a>
   <nav>
     <a href="core.html">Core</a>
     <a href="css.html" class="active">CSS</a>
@@ -18,8 +18,8 @@
     <a href="event-test.html">Event Test</a>
   </nav>
   <div class="header-right">
-    <a href="https://github.com/ImsirovicAjdin/uistate-css/stargazers" class="star-link">★ Star</a>
-    <a href="https://www.npmjs.com/package/@uistate/css">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/ever-css/stargazers" class="star-link">★ Star</a>
+    <a href="https://www.npmjs.com/package/@everystate/css">npm</a>
     <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
   </div>
 </header>
@@ -55,17 +55,17 @@
 
 <main class="main">
 
-  <h1>@uistate/css <span class="version-badge">1.0.0</span></h1>
+  <h1>@everystate/css <span class="version-badge">1.0.0</span></h1>
   <p>CSS-native state management using CSS custom properties and data attributes. No bundler, no framework — state lives in CSS and is inspectable in DevTools.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
-    <pre><code>npm install @uistate/css</code></pre>
-    <button class="copy-btn" onclick="__copy('npm install @uistate/css', this)">Copy</button>
+    <pre><code>npm install @everystate/css</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/css', this)">Copy</button>
   </div>
 
   <h2 id="overview">Overview</h2>
-  <p><code>@uistate/css</code> stores state directly in CSS custom properties (<code>--key: value</code>) on <code>:root</code> and as <code>data-*</code> attributes on elements. This means:</p>
+  <p><code>@everystate/css</code> stores state directly in CSS custom properties (<code>--key: value</code>) on <code>:root</code> and as <code>data-*</code> attributes on elements. This means:</p>
   <ul>
     <li>CSS selectors can react to state: <code>[data-theme="dark"] { ... }</code></li>
     <li>State is visible in DevTools (Elements → Computed → CSS variables)</li>
@@ -76,7 +76,7 @@
   <h2 id="createCssState">createCssState(initialState)</h2>
   <div class="api-sig">createCssState(initial?: object) → cssStateManager</div>
   <p>Creates a CSS state manager. Call <code>.init()</code> to inject the managed <code>&lt;style&gt;</code> element and apply initial state.</p>
-  <pre><code>import { createCssState } from '@uistate/css';
+  <pre><code>import { createCssState } from '@everystate/css';
 
 const ui = createCssState({ theme: 'light', count: 0 });
 ui.init();
@@ -125,7 +125,7 @@ unobserve(); // stop watching</code></pre>
       <tr><td><code>'hybrid'</code></td><td>Strings are escaped, objects are JSON. Default mode.</td></tr>
     </tbody>
   </table>
-  <pre><code>import { createSerializer } from '@uistate/css';
+  <pre><code>import { createSerializer } from '@everystate/css';
 
 const ser = createSerializer({ mode: 'hybrid' });
 ser.serialize('hello world');     // 'hello\\ world'
@@ -135,7 +135,7 @@ ser.deserialize('hello\\ world'); // 'hello world'</code></pre>
   <h2 id="templateManager">Template Manager</h2>
   <div class="api-sig">createTemplateManager(stateManager?) → templateManager</div>
   <p>Component mounting via <code>&lt;template&gt;</code> elements, event delegation via <code>data-action</code> attributes, and CSS-variable-based templating.</p>
-  <pre><code>import { createCssState, createTemplateManager } from '@uistate/css';
+  <pre><code>import { createCssState, createTemplateManager } from '@everystate/css';
 
 const ui = createCssState({ user: 'Alice' });
 ui.init();
@@ -156,7 +156,7 @@ tm.attachDelegation(document.getElementById('app'));</code></pre>
   <h2 id="wordpress">WordPress</h2>
   <p>Drop a <code>&lt;script&gt;</code> tag into your theme. No build step, no React, no webpack. State lives in CSS custom properties that your existing stylesheets can reference.</p>
   <pre><code>&lt;script type="module"&gt;
-  import { createCssState } from 'https://esm.sh/@uistate/css';
+  import { createCssState } from 'https://esm.sh/@everystate/css';
   const ui = createCssState({ sidebar: 'open', theme: 'light' });
   ui.init();
 &lt;/script&gt;
@@ -167,10 +167,10 @@ tm.attachDelegation(document.getElementById('app'));</code></pre>
 &lt;/style&gt;</code></pre>
 
   <h2 id="static-sites">Static Sites (Jekyll, Hugo, 11ty)</h2>
-  <p>Add interactivity to server-rendered HTML. The server provides structure, <code>@uistate/css</code> adds reactive state without a SPA framework.</p>
+  <p>Add interactivity to server-rendered HTML. The server provides structure, <code>@everystate/css</code> adds reactive state without a SPA framework.</p>
 
   <h2 id="web-components">Web Components</h2>
-  <p>CSS custom properties defined on <code>:root</code> cascade into Shadow DOM. This makes <code>@uistate/css</code> a natural theming bridge for web component architectures.</p>
+  <p>CSS custom properties defined on <code>:root</code> cascade into Shadow DOM. This makes <code>@everystate/css</code> a natural theming bridge for web component architectures.</p>
   <pre><code>// Inside a web component
 connectedCallback() {
   // Read the global theme token
