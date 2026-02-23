@@ -1,7 +1,7 @@
 <html lang="en" data-theme="dark"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UIstate — Path-based state management for the web</title>
+  <title>EveryState: Path-based state management for the web</title>
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
   <style>
@@ -194,7 +194,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">UIstate</a>
+  <a href="/" class="logo">EveryState</a>
   <nav>
     <a href="core.html">Core</a>
     <a href="css.html">CSS</a>
@@ -202,16 +202,16 @@
     <a href="event-test.html">Event Test</a>
   </nav>
   <div class="header-right">
-    <span class="nav-install">npm i @uistate/core <button class="copy-btn" onclick="__copy('npm install @uistate/core', this)">Copy</button></span>
+    <span class="nav-install">npm i @EveryState/core <button class="copy-btn" onclick="__copy('npm install @everystate/core', this)">Copy</button></span>
     <a href="core.html" class="nav-get-started">Get Started</a>
-    <a href="https://github.com/ImsirovicAjdin/uistate/stargazers" class="star-link">★ Star</a>
+    <a href="https://github.com/ImsirovicAjdin/EveryState/stargazers" class="star-link">★ Star</a>
     <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch to dark theme">☾</button>
   </div>
 </header>
 
 <main class="main landing">
   <div class="hero">
-    <h1>UIstate</h1>
+    <h1>EveryState</h1>
     <p class="tagline">Path-based state management with wildcard subscriptions, async support, and state-driven CSS.</p>
     <p>Click the button. Watch the state update. That's the whole API.</p>
   </div>
@@ -256,19 +256,19 @@
 
   <div class="features">
     <div class="feature-card">
-      <h3>@uistate/core</h3>
+      <h3>@everystate/core</h3>
       <p>Reactive store with path-based get/set/subscribe, wildcard listeners, async operations, and query client. ~6 KB, zero dependencies.</p>
     </div>
     <div class="feature-card">
-      <h3>@uistate/css</h3>
+      <h3>@everystate/css</h3>
       <p>State-driven CSS — write styles as state paths, compile to real CSS rules. Reactive design tokens, typed validation, WCAG contrast enforcement.</p>
     </div>
     <div class="feature-card">
-      <h3>@uistate/event-test</h3>
-      <p>Event-sequence testing for UIstate stores. Trigger state changes and assert values, types, and event firings in a chainable API.</p>
+      <h3>@everystate/event-test</h3>
+      <p>Event-sequence testing for EveryState stores. Trigger state changes and assert values, types, and event firings in a chainable API.</p>
     </div>
     <div class="feature-card">
-      <h3>@uistate/examples</h3>
+      <h3>@everystate/examples</h3>
       <p>Working examples: counters, dashboards, async patterns, data tables. Each example is a standalone HTML file.</p>
     </div>
   </div>
@@ -280,55 +280,50 @@
     </thead>
     <tbody>
       <tr>
-        <td><a href="core.html">@uistate/core</a></td>
-        <td><span class="version-badge">5.6.1</span></td>
+        <td><a href="core.html">@everystate/core</a></td>
+        <td><span class="version-badge">1.0.0</span></td>
         <td>Path-based state management</td>
       </tr>
       <tr>
-        <td><a href="https://www.npmjs.com/package/@uistate/renderer">@uistate/renderer</a></td>
-        <td><span class="version-badge">1.0.0</span></td>
-        <td>Direct-binding reactive renderer</td>
-      </tr>
-      <tr>
-        <td><a href="react.html">@uistate/react</a></td>
+        <td><a href="react.html">@everystate/react</a></td>
         <td><span class="version-badge">1.0.0</span></td>
         <td>React adapter hooks</td>
       </tr>
       <tr>
-        <td><a href="css.html">@uistate/css</a></td>
+        <td><a href="css.html">@everystate/css</a></td>
         <td><span class="version-badge">1.0.0</span></td>
         <td>CSS-native state via custom properties</td>
       </tr>
       <tr>
-        <td><a href="event-test.html">@uistate/event-test</a></td>
+        <td><a href="event-test.html">@everystate/event-test</a></td>
         <td><span class="version-badge">1.0.0</span></td>
         <td>Event-sequence testing</td>
       </tr>
       <tr>
-        <td><a href="https://www.npmjs.com/package/@uistate/examples">@uistate/examples</a></td>
+        <td><a href="https://www.npmjs.com/package/@everystate/examples">@everystate/examples</a></td>
         <td><span class="version-badge">1.0.0</span></td>
         <td>Example applications</td>
       </tr>
       <tr>
-        <td><a href="https://www.npmjs.com/package/@uistate/aliases">@uistate/aliases</a></td>
+        <td><a href="https://www.npmjs.com/package/@everystate/aliases">@everystate/aliases</a></td>
         <td><span class="version-badge">1.0.0</span></td>
         <td>DOM aliases for vanilla JS</td>
       </tr>
     </tbody>
   </table>
 
-  <h2>Why UIstate?</h2>
+  <h2>Why EveryState?</h2>
   <ul>
-    <li><strong>One primitive</strong> — <code>get</code>, <code>set</code>, <code>subscribe</code>. That's the whole API.</li>
-    <li><strong>Path-based</strong> — nested state via dot paths: <code>user.profile.name</code></li>
-    <li><strong>Wildcards</strong> — <code>user.*</code> fires on any child change, <code>*</code> fires on everything</li>
-    <li><strong>Async built-in</strong> — <code>setAsync</code> manages loading/success/error states automatically</li>
-    <li><strong>Framework-free</strong> — works in any browser, with any framework, or with none</li>
-    <li><strong>Zero dependencies</strong> — ~6 KB total, pure JavaScript</li>
+    <li><strong>One primitive</strong>: <code>get</code>, <code>set</code>, <code>subscribe</code>. That's the whole API.</li>
+    <li><strong>Path-based</strong>: nested state via dot paths: <code>user.profile.name</code></li>
+    <li><strong>Wildcards</strong>: <code>user.*</code> fires on any child change, <code>*</code> fires on everything</li>
+    <li><strong>Async built-in</strong>: <code>setAsync</code> manages loading/success/error states automatically</li>
+    <li><strong>Framework-free</strong>: works in any browser, with any framework, or with none</li>
+    <li><strong>Zero dependencies</strong>: ~6 KB total, pure JavaScript</li>
   </ul>
 
   <h2>License</h2>
-  <p><code>@uistate/core</code> and <code>@uistate/css</code> are MIT licensed. <code>@uistate/event-test</code> has a proprietary license (free for personal/OSS use).</p>
+  <p>Every package is MIT licensed. <code>@everystate/test</code> has a proprietary license (free for personal/OSS use).</p>
 
 </main>
 
@@ -374,7 +369,7 @@ function __copy(text, btn) {
   // Step 1 (lines 5-8): subscribe
   // Step 2 (lines 9-13): onclick + store.set
   var codeLines = [
-    '<span class="kw">import</span> { <span class="fn">createEventState</span> } <span class="kw">from</span> <span class="st">\'@uistate/core\'</span>;',
+    '<span class="kw">import</span> { <span class="fn">createEventState</span> } <span class="kw">from</span> <span class="st">\'@EveryState/core\'</span>;',
     '',
     '<span class="kw">const</span> store = <span class="fn">createEventState</span>({<span class="pr">count</span>: <span class="nb">0</span>});',
     '',
