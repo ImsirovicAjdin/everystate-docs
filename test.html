@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@uistate/event-test — API Reference</title>
+  <title>@everystate/event-test API Reference</title>
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
 </head>
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">UIstate</a>
+  <a href="/" class="logo">everystate</a>
   <nav>
     <a href="core.html">Core</a>
     <a href="css.html">CSS</a>
@@ -18,8 +18,8 @@
     <a href="event-test.html" class="active">Event Test</a>
   </nav>
   <div class="header-right">
-    <a href="https://github.com/ImsirovicAjdin/uistate-event-test/stargazers" class="star-link">★ Star</a>
-    <a href="https://www.npmjs.com/package/@uistate/event-test">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-event-test/stargazers" class="star-link">★ Star</a>
+    <a href="https://www.npmjs.com/package/@everystate/event-test">npm</a>
     <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
   </div>
 </header>
@@ -50,22 +50,22 @@
 
 <main class="main">
 
-  <h1>@uistate/event-test <span class="version-badge">1.0.0</span></h1>
-  <p>Event-sequence testing for UIstate stores. Trigger state changes and assert values, types, and event firings in a chainable API.</p>
+  <h1>@everystate/event-test <span class="version-badge">1.0.0</span></h1>
+  <p>Event-sequence testing for everystate stores. Trigger state changes and assert values, types, and event firings in a chainable API.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
-    <pre><code>npm install @uistate/event-test @uistate/core</code></pre>
-    <button class="copy-btn" onclick="__copy('npm install @uistate/event-test @uistate/core', this)">Copy</button>
+    <pre><code>npm install @everystate/event-test @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/event-test @everystate/core', this)">Copy</button>
   </div>
-  <p><code>@uistate/core</code> is a peer dependency.</p>
+  <p><code>@everystate/core</code> is a peer dependency.</p>
 
   <h2 id="license">License</h2>
-  <p><strong>Proprietary.</strong> Free for personal use, open-source projects, and educational use. Commercial use requires a separate license. See <a href="https://github.com/ImsirovicAjdin/uistate-event-test/blob/main/LICENSE.md">LICENSE.md</a> for full terms.</p>
+  <p><strong>Proprietary.</strong> Free for personal use, open-source projects, and educational use. Commercial use requires a separate license. See <a href="https://github.com/ImsirovicAjdin/everystate-event-test/blob/main/LICENSE.md">LICENSE.md</a> for full terms.</p>
   <p>Contact: <a href="mailto:ajdika@live.com">ajdika@live.com</a></p>
 
   <h2 id="quick-start">Quick Start</h2>
-  <pre><code>import { createEventTest, test, runTests } from '@uistate/event-test';
+  <pre><code>import { createEventTest, test, runTests } from '@everystate/event-test';
 
 test('counter increments', () =&gt; {
   const t = createEventTest({ count: 0 });
