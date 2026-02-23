@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@uistate/core — API Reference</title>
+  <title>@everystate/core API Reference</title>
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
 </head>
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">UIstate</a>
+  <a href="/" class="logo">EveryState</a>
   <nav>
     <a href="core.html" class="active">Core</a>
     <a href="css.html">CSS</a>
     <a href="react.html">React</a>
-    <a href="event-test.html">Event Test</a>
+    <a href="event-test.html">EveryState Test</a>
   </nav>
   <div class="header-right">
-    <a href="https://github.com/ImsirovicAjdin/uistate/stargazers" class="star-link">★ Star</a>
-    <a href="https://www.npmjs.com/package/@uistate/core">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate/stargazers" class="star-link">★ Star</a>
+    <a href="https://www.npmjs.com/package/@everystate/core">npm</a>
     <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
   </div>
 </header>
@@ -32,7 +32,7 @@
   </ul>
   <h3>API</h3>
   <ul>
-    <li><a href="#createEventState">createEventState</a></li>
+    <li><a href="#createEveryState">createEveryState</a></li>
     <li><a href="#get">store.get</a></li>
     <li><a href="#set">store.set</a></li>
     <li><a href="#subscribe">store.subscribe</a></li>
@@ -57,17 +57,17 @@
 
 <main class="main">
 
-  <h1>@uistate/core <span class="version-badge">5.5.2</span></h1>
+  <h1>@everystate/core <span class="version-badge">1.0.0</span></h1>
   <p>Path-based state management with wildcard subscriptions and async support. ~6 KB, zero dependencies.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
-    <pre><code>npm i @uistate/core</code></pre>
-    <button class="copy-btn" onclick="__copy('npm install @uistate/core', this)">Copy</button>
+    <pre><code>npm i @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/core', this)">Copy</button>
   </div>
 
   <h2 id="quick-start">Quick Start</h2>
-  <pre><code>import { createEventState } from '@uistate/core';
+  <pre><code>import { createEventState } from '@everystate/core';
 
 const store = createEventState({ count: 0, user: { name: 'Alice' } });
 
@@ -83,7 +83,7 @@ store.get('count');           // 1
 // Cleanup
 unsub();</code></pre>
 
-  <h2 id="createEventState">createEventState(initialState)</h2>
+  <h2 id="createEveryState">createEveryState(initialState)</h2>
   <div class="api-sig">createEventState(initial?: object) → store</div>
   <p>Creates a new reactive store. The initial state is deep-cloned.</p>
   <pre><code>const store = createEventState({ count: 0 });
@@ -137,7 +137,7 @@ store.set('count', 1);           // does NOT fire</code></pre>
   <pre><code>store.subscribe('*', ({ path, value }) =&gt; {
   console.log(`[state] ${path} =`, value);
 });
-// Fires on every set() call — useful for logging/telemetry</code></pre>
+// Fires on every set() call, useful for logging/telemetry</code></pre>
 
   <h2 id="setAsync">store.setAsync(path, fetcher)</h2>
   <div class="api-sig">store.setAsync(path: string, fetcher: (signal: AbortSignal) → Promise) → Promise</div>
@@ -172,8 +172,8 @@ store.cancel('users');            // aborts, status → 'cancelled'</code></pre>
 
   <h2 id="query-client">Query Client</h2>
   <p>A convenience wrapper around <code>setAsync</code> for data-fetching patterns. Uses the <code>query.${key}</code> namespace internally.</p>
-  <pre><code>import { createEventState } from '@uistate/core';
-import { createQueryClient } from '@uistate/core/query';
+  <pre><code>import { createEventState } from '@everystate/core';
+import { createQueryClient } from '@everystate/core/query';
 
 const store = createEventState();
 const qc = createQueryClient(store);</code></pre>
