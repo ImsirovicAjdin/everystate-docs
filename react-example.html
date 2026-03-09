@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EveryState + React 18 - Complete Example</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .main.landing { max-width: 1060px; }
+    .example-intro { text-align: center; padding: 2rem 0 1rem; }
+    .example-intro h1 { font-size: 2rem; }
+    .example-intro p { color: var(--text-muted); max-width: 640px; margin: 0 auto 0.5rem; }
+
+    .file-block { margin-bottom: 1.5rem; }
+    .file-block-header {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-bottom: none; border-radius: 8px 8px 0 0;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      color: var(--text-muted);
+    }
+    .file-block-header .file-icon { color: var(--accent); }
+    .file-block-header .file-badge {
+      margin-left: auto; font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 1rem;
+      background: var(--accent-subtle); color: var(--accent);
+    }
+    .file-block pre {
+      margin: 0; border-radius: 0 0 8px 8px;
+      border: 1px solid var(--border); border-top: none;
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+    .adapter-source { margin: 2rem 0; }
+    .adapter-source h2 { text-align: center; border: none; }
+    .adapter-source > p { text-align: center; color: var(--text-muted); margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState.js</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://www.npmjs.com/package/@everystate/react">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-react" class="star-link">★ Star</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
+  </div>
+</header>
+
+<main class="main landing">
+
+  <div class="example-intro">
+    <h1>EveryState + React 18</h1>
+    <p>A complete task manager built with <code>@everystate/react</code>. Every file shown below. No magic, no hidden code.</p>
+    <p style="font-size:0.85rem;">Install: <code>npm i @everystate/core @everystate/react react react-dom</code></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- WHAT YOU'RE LOOKING AT -->
+  <!-- ============================================================ -->
+
+  <div class="features" style="margin-bottom:2rem;">
+    <div class="feature-card blue">
+      <h3>5 files, ~130 lines total</h3>
+      <p>Store, business logic, 3 React components. That's the whole app.</p>
+    </div>
+    <div class="feature-card green">
+      <h3>Zero business logic in components</h3>
+      <p>Components read (<code>usePath</code>) and publish (<code>useIntent</code>). Subscribers handle logic.</p>
+    </div>
+    <div class="feature-card purple">
+      <h3>Testable without React</h3>
+      <p>Every behavior is testable with <code>store.set()</code> + <code>store.get()</code>. No render needed.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 1: store.js -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> store.js
+      <span class="file-badge">store + logic</span>
+    </div>
+    <pre><code>import { createEveryState } from '@everystate/core';
+
+// ---- Store (created outside React) ----
+export const store = createEveryState({
+  state: {
+    tasks: [],
+    taskCount: 0,
+    filter: 'all',      // 'all' | 'active' | 'completed'
+  },
+  derived: {
+    tasks: { filtered: [] },
+  },
+});
+
+// ---- Business logic (pure subscribers, no React imports) ----
+
+let nextId = 1;
+
+store.subscribe('intent.addTask', (text) =&gt; {
+  const t = String(text || '').trim();
+  if (!t) return;
+  const tasks = store.get('state.tasks') || [];
+  const next = [...tasks, { id: nextId++, text: t, completed: false }];
+  store.set('state.tasks', next);
+  store.set('state.taskCount', next.length);
+});
+
+store.subscribe('intent.toggleTask', (id) =&gt; {
+  const tasks = store.get('state.tasks') || [];
+  store.set('state.tasks',
+    tasks.map(t =&gt; t.id === id ? { ...t, completed: !t.completed } : t)
+  );
+});
+
+store.subscribe('intent.deleteTask', (id) =&gt; {
+  const tasks = (store.get('state.tasks') || []).filter(t =&gt; t.id !== id);
+  store.set('state.tasks', tasks);
+  store.set('state.taskCount', tasks.length);
+});
+
+store.subscribe('intent.changeFilter', (filter) =&gt; {
+  store.set('state.filter', filter);
+});
+
+// ---- Derived state ----
+
+function recomputeFiltered() {
+  const tasks = store.get('state.tasks') || [];
+  const filter = store.get('state.filter');
+  const filtered = tasks.filter(t =&gt; {
+    if (filter === 'active') return !t.completed;
+    if (filter === 'completed') return t.completed;
+    return true;
+  });
+  store.set('derived.tasks.filtered', filtered);
+}
+
+store.subscribe('state.tasks', recomputeFiltered);
+store.subscribe('state.filter', recomputeFiltered);
+recomputeFiltered();</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 2: App.jsx -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> App.jsx
+      <span class="file-badge">root component</span>
+    </div>
+    <pre><code>import { EventStateProvider } from '@everystate/react';
+import { store } from './store.js';
+import { TaskInput } from './TaskInput.jsx';
+import { TaskList } from './TaskList.jsx';
+import { FilterBar } from './FilterBar.jsx';
+
+export default function App() {
+  return (
+    &lt;EventStateProvider store={store}&gt;
+      &lt;div className="app"&gt;
+        &lt;h1&gt;Tasks&lt;/h1&gt;
+        &lt;TaskInput /&gt;
+        &lt;FilterBar /&gt;
+        &lt;TaskList /&gt;
+      &lt;/div&gt;
+    &lt;/EventStateProvider&gt;
+  );
+}</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 3 + 4 side by side -->
+  <!-- ============================================================ -->
+
+  <div class="two-col">
+
+    <!-- TaskInput.jsx -->
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> TaskInput.jsx
+        <span class="file-badge">publish intent</span>
+      </div>
+      <pre><code>import { useState } from 'react';
+import { useIntent } from '@everystate/react';
+
+export function TaskInput() {
+  const [text, setText] = useState('');
+  const addTask = useIntent('intent.addTask');
+
+  function submit() {
+    if (text.trim()) {
+      addTask(text);
+      setText('');
+    }
+  }
+
+  return (
+    &lt;div className="task-input"&gt;
+      &lt;input
+        value={text}
+        onChange={e =&gt; setText(e.target.value)}
+        placeholder="What needs to be done?"
+        onKeyDown={e =&gt; {
+          if (e.key === 'Enter') submit();
+        }}
+      /&gt;
+      &lt;button onClick={submit}&gt;Add&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+    </div>
+
+    <!-- FilterBar.jsx -->
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> FilterBar.jsx
+        <span class="file-badge">read + publish</span>
+      </div>
+      <pre><code>import { usePath, useIntent } from '@everystate/react';
+
+export function FilterBar() {
+  const filter = usePath('state.filter');
+  const count = usePath('state.taskCount');
+  const setFilter = useIntent('intent.changeFilter');
+
+  return (
+    &lt;div className="filter-bar"&gt;
+      &lt;span&gt;
+        {count} task{count === 1 ? '' : 's'}
+      &lt;/span&gt;
+      &lt;div className="filter-buttons"&gt;
+        {['all', 'active', 'completed'].map(f =&gt; (
+          &lt;button
+            key={f}
+            className={filter === f ? 'active' : ''}
+            onClick={() =&gt; setFilter(f)}
+          &gt;
+            {f}
+          &lt;/button&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 5: TaskList.jsx -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> TaskList.jsx
+      <span class="file-badge">read derived + publish intents</span>
+    </div>
+    <pre><code>import { usePath, useIntent } from '@everystate/react';
+
+export function TaskList() {
+  const items = usePath('derived.tasks.filtered');
+  const toggle = useIntent('intent.toggleTask');
+  const del = useIntent('intent.deleteTask');
+
+  if (!items || items.length === 0) {
+    return &lt;p className="empty"&gt;No tasks match the current filter.&lt;/p&gt;;
+  }
+
+  return (
+    &lt;ul className="task-list"&gt;
+      {items.map(task =&gt; (
+        &lt;li key={task.id} className={task.completed ? 'done' : ''}&gt;
+          &lt;input
+            type="checkbox"
+            checked={task.completed}
+            onChange={() =&gt; toggle(task.id)}
+          /&gt;
+          &lt;span className="task-text"&gt;{task.text}&lt;/span&gt;
+          &lt;button className="delete-btn" onClick={() =&gt; del(task.id)}&gt;
+            &amp;times;
+          &lt;/button&gt;
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TESTING -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> store.test.js
+      <span class="file-badge">test without React</span>
+    </div>
+    <pre><code>// No React imports. No render(). No screen.getByRole(). Just state.
+import { store } from './store.js';
+
+test('addTask creates a task and increments count', () =&gt; {
+  store.set('intent.addTask', 'Buy milk');
+  expect(store.get('state.taskCount')).toBe(1);
+  expect(store.get('state.tasks')[0].text).toBe('Buy milk');
+});
+
+test('toggleTask flips completed', () =&gt; {
+  const id = store.get('state.tasks')[0].id;
+  store.set('intent.toggleTask', id);
+  expect(store.get('state.tasks')[0].completed).toBe(true);
+});
+
+test('filter shows only active tasks', () =&gt; {
+  store.set('intent.addTask', 'Walk dog');
+  store.set('intent.changeFilter', 'active');
+  const filtered = store.get('derived.tasks.filtered');
+  expect(filtered.every(t =&gt; !t.completed)).toBe(true);
+});
+
+test('deleteTask removes task and decrements count', () =&gt; {
+  const before = store.get('state.taskCount');
+  const id = store.get('state.tasks')[0].id;
+  store.set('intent.deleteTask', id);
+  expect(store.get('state.taskCount')).toBe(before - 1);
+});</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- THE ADAPTER SOURCE -->
+  <!-- ============================================================ -->
+
+  <div class="adapter-source">
+    <h2>The Entire React Adapter (~50 lines)</h2>
+    <p>This is the full source of <code>@everystate/react</code>. No hidden abstractions.</p>
+
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> @everystate/react/eventStateReact.js
+        <span class="file-badge">adapter source</span>
+      </div>
+      <pre><code>import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
+
+const EventStateContext = createContext(null);
+
+// -- Provider (dependency injection, not state management) --
+
+export function EventStateProvider({ store, children }) {
+  return (
+    &lt;EventStateContext.Provider value={store}&gt;
+      {children}
+    &lt;/EventStateContext.Provider&gt;
+  );
+}
+
+export function useStore() {
+  const store = useContext(EventStateContext);
+  if (!store) {
+    throw new Error(
+      'useStore: no store found. Wrap your tree in &lt;EventStateProvider store={store}&gt;.'
+    );
+  }
+  return store;
+}
+
+// -- Read a single path (concurrent-mode safe) --
+
+export function usePath(path) {
+  const store = useStore();
+
+  const subscribe = useMemo(
+    () =&gt; (onStoreChange) =&gt; store.subscribe(path, () =&gt; onStoreChange()),
+    [store, path]
+  );
+
+  const getSnapshot = useMemo(
+    () =&gt; () =&gt; store.get(path),
+    [store, path]
+  );
+
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
+
+// -- Publish to a path (stable, memoized) --
+
+export function useIntent(path) {
+  const store = useStore();
+  return useMemo(
+    () =&gt; (value) =&gt; store.set(path, value),
+    [store, path]
+  );
+}
+
+// -- Wildcard subscription --
+
+export function useWildcard(wildcardPath) {
+  const store = useStore();
+  const parentPath = wildcardPath.endsWith('.*')
+    ? wildcardPath.slice(0, -2)
+    : wildcardPath;
+
+  const subscribe = useMemo(
+    () =&gt; (onStoreChange) =&gt; store.subscribe(wildcardPath, () =&gt; onStoreChange()),
+    [store, wildcardPath]
+  );
+
+  const getSnapshot = useMemo(
+    () =&gt; () =&gt; store.get(parentPath),
+    [store, parentPath]
+  );
+
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
+
+// -- Async with status tracking --
+
+export function useAsync(path) {
+  const store = useStore();
+  const data   = usePath(`${path}.data`);
+  const status = usePath(`${path}.status`);
+  const error  = usePath(`${path}.error`);
+
+  const execute = useMemo(
+    () =&gt; (fetcher) =&gt; store.setAsync(path, fetcher),
+    [store, path]
+  );
+
+  const cancel = useMemo(
+    () =&gt; () =&gt; store.cancel(path),
+    [store, path]
+  );
+
+  return { data, status, error, execute, cancel };
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- REACT vs VUE SIDE-BY-SIDE -->
+  <!-- ============================================================ -->
+
+  <h2 style="border:none; text-align:center; margin-top:2rem;">React vs Vue - Same Store, Different Adapter</h2>
+  <p style="text-align:center; color:var(--text-muted); margin-bottom:1.5rem;">The <code>store.js</code> file is identical. Only the components change.</p>
+
+  <div class="two-col">
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> React: FilterBar.jsx
+      </div>
+      <pre><code>import { usePath, useIntent } from '@everystate/react';
+
+export function FilterBar() {
+  const filter = usePath('state.filter');
+  const setFilter = useIntent('intent.changeFilter');
+
+  return (
+    &lt;div&gt;
+      {['all', 'active', 'completed'].map(f =&gt; (
+        &lt;button
+          key={f}
+          className={filter === f ? 'active' : ''}
+          onClick={() =&gt; setFilter(f)}
+        &gt;
+          {f}
+        &lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+    </div>
+
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon" style="color:var(--green);">&#9679;</span> Vue: FilterBar.vue
+      </div>
+      <pre><code>&lt;script setup&gt;
+import { usePath, useIntent } from '@everystate/vue';
+
+const filter = usePath('state.filter');
+const setFilter = useIntent('intent.changeFilter');
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button
+      v-for="f in ['all', 'active', 'completed']"
+      :key="f"
+      :class="{ active: filter === f }"
+      @click="setFilter(f)"
+    &gt;
+      {{ f }}
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- KEY TAKEAWAYS -->
+  <!-- ============================================================ -->
+
+  <h2 style="border:none; text-align:center; margin-top:2rem;">Key Takeaways</h2>
+
+  <div class="why-grid">
+    <div class="why-item">
+      <h4>Store lives outside React</h4>
+      <p>Created once in <code>store.js</code>. Independent lifecycle. No <code>useReducer</code>, no <code>createSlice</code>.</p>
+    </div>
+    <div class="why-item">
+      <h4>Components are thin</h4>
+      <p><code>usePath</code> reads, <code>useIntent</code> writes. Components never compute or mutate state directly.</p>
+    </div>
+    <div class="why-item">
+      <h4>Logic is in subscribers</h4>
+      <p>All business rules live in <code>store.subscribe()</code> handlers. Testable without rendering any component.</p>
+    </div>
+    <div class="why-item">
+      <h4>Concurrent-mode safe</h4>
+      <p><code>usePath</code> is built on React 18's <code>useSyncExternalStore</code>. No tearing, no stale reads.</p>
+    </div>
+    <div class="why-item">
+      <h4>Derived state is explicit</h4>
+      <p>Filtered tasks are a subscriber that writes to <code>derived.*</code>. Components just read the result.</p>
+    </div>
+    <div class="why-item">
+      <h4>Same store works in Vue</h4>
+      <p>The <code>store.js</code> file is identical across frameworks. Only the adapter imports change. <a href="vue-example.html">See Vue version</a>.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin: 2.5rem 0 1rem;">
+    <a href="react.html" class="btn btn-primary">Full React API Reference</a>
+    <a href="https://www.npmjs.com/package/@everystate/react" class="btn btn-secondary" style="margin-left:0.5rem;">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-react" class="btn btn-secondary" style="margin-left:0.5rem;">GitHub</a>
+  </div>
+
+  <footer class="site-footer">
+    <p>MIT &copy; Ajdin Imsirovic &middot; <a href="https://www.npmjs.com/package/@everystate/react">npm</a> &middot; <a href="https://github.com/ImsirovicAjdin/everystate-react">GitHub</a></p>
+  </footer>
+
+</main>
+
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+</body>
+</html>
