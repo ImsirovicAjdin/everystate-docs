@@ -1,5 +1,5 @@
 /**
- * Theme toggle — blocks in <head> to prevent flash of wrong theme.
+ * Theme toggle - blocks in <head> to prevent flash of wrong theme.
  * Priority: localStorage > dark (default)
  * Sets data-theme on <html> before first paint.
  */

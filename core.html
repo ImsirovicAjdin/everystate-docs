@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@everystate/core — API Reference</title>
+  <title>@everystate/core - API Reference</title>
   <meta name="description" content="Complete API reference for @everystate/core: createEveryState, get, set, subscribe, setAsync, batch, destroy, and query client.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,7 +11,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState</a>
+  <a href="/" class="logo">EveryState.js</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html" class="active">Core</a>
@@ -138,7 +138,7 @@ store.set('count', 1);           // does NOT fire</code></pre>
   <pre><code>store.subscribe('*', ({ path, value }) =&gt; {
   console.log(`[state] ${path} =`, value);
 });
-// Fires on every set() call — useful for logging/telemetry</code></pre>
+// Fires on every set() call - useful for logging/telemetry</code></pre>
 
   <!-- ═══ setMany ═══ -->
   <h2 id="setMany">store.setMany(entries)</h2>
@@ -232,8 +232,8 @@ qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
       <tr><td><code>'user.profile.*'</code></td><td>Yes</td><td><code>(detail)</code></td></tr>
       <tr><td><code>'user.*'</code></td><td>Yes</td><td><code>(detail)</code></td></tr>
       <tr><td><code>'*'</code></td><td>Yes</td><td><code>(detail)</code></td></tr>
-      <tr><td><code>'user.profile'</code></td><td>No</td><td>—</td></tr>
-      <tr><td><code>'user'</code></td><td>No</td><td>—</td></tr>
+      <tr><td><code>'user.profile'</code></td><td>No</td><td>-</td></tr>
+      <tr><td><code>'user'</code></td><td>No</td><td>-</td></tr>
     </tbody>
   </table>
   <p>Wildcards match on <strong>parent paths</strong>, not the exact path being set. This mirrors DOM event bubbling.</p>
@@ -242,9 +242,9 @@ qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
   <h2 id="notification-order">Notification Order</h2>
   <p>When you call <code>store.set('user.name', 'Bob')</code>, subscribers fire in this order:</p>
   <ol>
-    <li><strong>Exact</strong> — subscribers on <code>'user.name'</code></li>
-    <li><strong>Parent wildcard</strong> — subscribers on <code>'user.*'</code></li>
-    <li><strong>Grandparent wildcard</strong> — subscribers on <code>'*'</code></li>
+    <li><strong>Exact</strong> - subscribers on <code>'user.name'</code></li>
+    <li><strong>Parent wildcard</strong> - subscribers on <code>'user.*'</code></li>
+    <li><strong>Grandparent wildcard</strong> - subscribers on <code>'*'</code></li>
   </ol>
 
   <!-- ═══ Async Patterns ═══ -->
@@ -257,7 +257,7 @@ qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
 store.setAsync('users', fetchUsers);</code></pre>
 
   <h3>Race condition handling</h3>
-  <pre><code>// User types fast — each keystroke triggers a search
+  <pre><code>// User types fast - each keystroke triggers a search
 input.addEventListener('input', () =&gt; {
   // setAsync auto-aborts the previous in-flight request
   store.setAsync('search', (signal) =&gt;

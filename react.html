@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@everystate/react — API Reference</title>
+  <title>@everystate/react - API Reference</title>
   <meta name="description" content="React adapter for EveryState: usePath, useIntent, useWildcard, useAsync hooks and EventStateProvider.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,7 +11,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState</a>
+  <a href="/" class="logo">EveryState.js</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
@@ -56,7 +56,7 @@
 <main class="main">
 
   <h1>@everystate/react <span class="version-badge">1.0.6</span></h1>
-  <p>React adapter for <a href="core.html">@everystate/core</a>. Five hooks and a provider — that's the entire API. ~50 lines, zero dependencies beyond React and the core store.</p>
+  <p>React adapter for <a href="core.html">@everystate/core</a>. Five hooks and a provider - that's the entire API. ~50 lines, zero dependencies beyond React and the core store.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
@@ -96,7 +96,7 @@ function App() {
   <h2 id="architecture">Architecture</h2>
   <p>The key insight: <strong>React is a rendering engine, not the application architecture.</strong></p>
   <ul>
-    <li>The store is created <em>outside</em> React — its lifecycle is independent</li>
+    <li>The store is created <em>outside</em> React - its lifecycle is independent</li>
     <li>Business logic lives in <em>subscribers</em>, not event handlers</li>
     <li>Components declare what they read (<code>usePath</code>) and what they publish (<code>useIntent</code>)</li>
     <li>The provider is dependency injection, not a state container</li>
@@ -105,10 +105,10 @@ function App() {
 
   <h2 id="EventStateProvider">EventStateProvider</h2>
   <div class="api-sig">&lt;EventStateProvider store={store}&gt; children &lt;/EventStateProvider&gt;</div>
-  <p>Makes a store available to descendant hooks via React Context. The store is created outside React — the provider doesn't own, create, or destroy it.</p>
+  <p>Makes a store available to descendant hooks via React Context. The store is created outside React - the provider doesn't own, create, or destroy it.</p>
   <pre><code>import { createEveryState } from '@everystate/core';
 
-// store.js — created once, outside any component
+// store.js - created once, outside any component
 export const store = createEveryState({ state: { tasks: [] } });
 
 // App.jsx
@@ -130,7 +130,7 @@ export default function App() {
   <p>Returns the EveryState store from context. Throws if called outside a provider.</p>
   <pre><code>const store = useStore();
 const value = store.get('some.path');</code></pre>
-  <p>You rarely need this — <code>usePath</code> and <code>useIntent</code> cover most cases.</p>
+  <p>You rarely need this - <code>usePath</code> and <code>useIntent</code> cover most cases.</p>
 
   <h2 id="usePath">usePath(path)</h2>
   <div class="api-sig">usePath(path: string) → any</div>
@@ -144,7 +144,7 @@ function TaskList() {
   const items = usePath('derived.tasks.filtered') || [];
   return &lt;ul&gt;{items.map(t =&gt; &lt;li key={t.id}&gt;{t.text}&lt;/li&gt;)}&lt;/ul&gt;;
 }</code></pre>
-  <p>This is the "read" side. No props, no selectors, no context consumers — just a path.</p>
+  <p>This is the "read" side. No props, no selectors, no context consumers - just a path.</p>
 
   <h2 id="useIntent">useIntent(path)</h2>
   <div class="api-sig">useIntent(path: string) → (value: any) → any</div>
@@ -200,7 +200,7 @@ function TaskList() {
   </table>
 
   <h2 id="business-logic">Business Logic Outside Components</h2>
-  <pre><code>// store.js — no React imports
+  <pre><code>// store.js - no React imports
 store.subscribe('intent.addTask', (text) =&gt; {
   const t = String(text || '').trim();
   if (!t) return;
@@ -220,7 +220,7 @@ store.subscribe('intent.addTask', (text) =&gt; {
 store.subscribe('state.tasks', recomputeDerived);
 store.subscribe('state.filter', recomputeDerived);
 recomputeDerived();</code></pre>
-  <p>Components read from <code>derived.*</code> — they never compute:</p>
+  <p>Components read from <code>derived.*</code> - they never compute:</p>
   <pre><code>const items = usePath('derived.tasks.filtered');</code></pre>
 
   <h2 id="race-conditions">Race Condition Handling</h2>

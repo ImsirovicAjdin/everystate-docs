@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EveryState + Vue 3 - Complete Example</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    /* Example-specific overrides */
+    .main.landing { max-width: 1060px; }
+    .example-intro { text-align: center; padding: 2rem 0 1rem; }
+    .example-intro h1 { font-size: 2rem; }
+    .example-intro p { color: var(--text-muted); max-width: 640px; margin: 0 auto 0.5rem; }
+
+    .file-block { margin-bottom: 1.5rem; }
+    .file-block-header {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-bottom: none; border-radius: 8px 8px 0 0;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      color: var(--text-muted);
+    }
+    .file-block-header .file-icon { color: var(--green); }
+    .file-block-header .file-badge {
+      margin-left: auto; font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 1rem;
+      background: var(--accent-subtle); color: var(--accent);
+    }
+    .file-block pre {
+      margin: 0; border-radius: 0 0 8px 8px;
+      border: 1px solid var(--border); border-top: none;
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+    .source-label {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-faint); margin-bottom: 0.5rem;
+    }
+
+    .highlight-box {
+      padding: 1rem 1.25rem; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-secondary);
+      margin-bottom: 1rem;
+    }
+    .highlight-box h4 { margin-top: 0; color: var(--accent); font-size: 0.9rem; }
+    .highlight-box p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0; }
+
+    .adapter-source { margin: 2rem 0; }
+    .adapter-source h2 { text-align: center; border: none; }
+    .adapter-source > p { text-align: center; color: var(--text-muted); margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState.js</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://www.npmjs.com/package/@everystate/vue">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-vue" class="star-link">★ Star</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
+  </div>
+</header>
+
+<main class="main landing">
+
+  <div class="example-intro">
+    <h1>EveryState + Vue 3</h1>
+    <p>A complete task manager built with <code>@everystate/vue</code>. Every file shown below. No magic, no hidden code.</p>
+    <p style="font-size:0.85rem;">Install: <code>npm i @everystate/core @everystate/vue vue</code></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- WHAT YOU'RE LOOKING AT -->
+  <!-- ============================================================ -->
+
+  <div class="features" style="margin-bottom:2rem;">
+    <div class="feature-card blue">
+      <h3>5 files, ~120 lines total</h3>
+      <p>Store, business logic, 3 Vue components. That's the whole app.</p>
+    </div>
+    <div class="feature-card green">
+      <h3>Zero business logic in components</h3>
+      <p>Components read (<code>usePath</code>) and publish (<code>useIntent</code>). Subscribers handle logic.</p>
+    </div>
+    <div class="feature-card purple">
+      <h3>Testable without Vue</h3>
+      <p>Every behavior is testable with <code>store.set()</code> + <code>store.get()</code>. No mount needed.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 1: store.js -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> store.js
+      <span class="file-badge">store + logic</span>
+    </div>
+    <pre><code>import { createEveryState } from '@everystate/core';
+
+// ---- Store (created outside Vue) ----
+export const store = createEveryState({
+  state: {
+    tasks: [],
+    taskCount: 0,
+    filter: 'all',      // 'all' | 'active' | 'completed'
+  },
+  derived: {
+    tasks: { filtered: [] },
+  },
+});
+
+// ---- Business logic (pure subscribers, no Vue imports) ----
+
+let nextId = 1;
+
+store.subscribe('intent.addTask', (text) =&gt; {
+  const t = String(text || '').trim();
+  if (!t) return;
+  const tasks = store.get('state.tasks') || [];
+  const next = [...tasks, { id: nextId++, text: t, completed: false }];
+  store.set('state.tasks', next);
+  store.set('state.taskCount', next.length);
+});
+
+store.subscribe('intent.toggleTask', (id) =&gt; {
+  const tasks = store.get('state.tasks') || [];
+  store.set('state.tasks',
+    tasks.map(t =&gt; t.id === id ? { ...t, completed: !t.completed } : t)
+  );
+});
+
+store.subscribe('intent.deleteTask', (id) =&gt; {
+  const tasks = (store.get('state.tasks') || []).filter(t =&gt; t.id !== id);
+  store.set('state.tasks', tasks);
+  store.set('state.taskCount', tasks.length);
+});
+
+store.subscribe('intent.changeFilter', (filter) =&gt; {
+  store.set('state.filter', filter);
+});
+
+// ---- Derived state ----
+
+function recomputeFiltered() {
+  const tasks = store.get('state.tasks') || [];
+  const filter = store.get('state.filter');
+  const filtered = tasks.filter(t =&gt; {
+    if (filter === 'active') return !t.completed;
+    if (filter === 'completed') return t.completed;
+    return true;
+  });
+  store.set('derived.tasks.filtered', filtered);
+}
+
+store.subscribe('state.tasks', recomputeFiltered);
+store.subscribe('state.filter', recomputeFiltered);
+recomputeFiltered();</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 2: App.vue -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> App.vue
+      <span class="file-badge">root component</span>
+    </div>
+    <pre><code>&lt;script setup&gt;
+import { provideStore } from '@everystate/vue';
+import { store } from './store.js';
+import TaskInput from './TaskInput.vue';
+import TaskList from './TaskList.vue';
+import FilterBar from './FilterBar.vue';
+
+// Inject the store into all descendants
+provideStore(store);
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div class="app"&gt;
+    &lt;h1&gt;Tasks&lt;/h1&gt;
+    &lt;TaskInput /&gt;
+    &lt;FilterBar /&gt;
+    &lt;TaskList /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 3 + 4 side by side -->
+  <!-- ============================================================ -->
+
+  <div class="two-col">
+
+    <!-- TaskInput.vue -->
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> TaskInput.vue
+        <span class="file-badge">publish intent</span>
+      </div>
+      <pre><code>&lt;script setup&gt;
+import { ref } from 'vue';
+import { useIntent } from '@everystate/vue';
+
+const text = ref('');
+const addTask = useIntent('intent.addTask');
+
+function submit() {
+  if (text.value.trim()) {
+    addTask(text.value);
+    text.value = '';
+  }
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div class="task-input"&gt;
+    &lt;input
+      v-model="text"
+      placeholder="What needs to be done?"
+      @keydown.enter="submit"
+    /&gt;
+    &lt;button @click="submit"&gt;Add&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+    </div>
+
+    <!-- FilterBar.vue -->
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> FilterBar.vue
+        <span class="file-badge">read + publish</span>
+      </div>
+      <pre><code>&lt;script setup&gt;
+import { usePath, useIntent } from '@everystate/vue';
+
+const filter = usePath('state.filter');
+const count = usePath('state.taskCount');
+const setFilter = useIntent('intent.changeFilter');
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div class="filter-bar"&gt;
+    &lt;span&gt;
+      {{ count }} task{{ count === 1 ? '' : 's' }}
+    &lt;/span&gt;
+    &lt;div class="filter-buttons"&gt;
+      &lt;button
+        v-for="f in ['all', 'active', 'completed']"
+        :key="f"
+        :class="{ active: filter === f }"
+        @click="setFilter(f)"
+      &gt;
+        {{ f }}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FILE 5: TaskList.vue -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> TaskList.vue
+      <span class="file-badge">read derived + publish intents</span>
+    </div>
+    <pre><code>&lt;script setup&gt;
+import { usePath, useIntent } from '@everystate/vue';
+
+const items = usePath('derived.tasks.filtered');
+const toggle = useIntent('intent.toggleTask');
+const del = useIntent('intent.deleteTask');
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;ul class="task-list" v-if="items &amp;&amp; items.length"&gt;
+    &lt;li v-for="task in items" :key="task.id" :class="{ done: task.completed }"&gt;
+      &lt;input
+        type="checkbox"
+        :checked="task.completed"
+        @change="toggle(task.id)"
+      /&gt;
+      &lt;span class="task-text"&gt;{{ task.text }}&lt;/span&gt;
+      &lt;button class="delete-btn" @click="del(task.id)"&gt;&amp;times;&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;p class="empty" v-else&gt;No tasks match the current filter.&lt;/p&gt;
+&lt;/template&gt;</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TESTING -->
+  <!-- ============================================================ -->
+
+  <div class="file-block">
+    <div class="file-block-header">
+      <span class="file-icon">&#9679;</span> store.test.js
+      <span class="file-badge">test without Vue</span>
+    </div>
+    <pre><code>// No Vue imports. No mount(). No wrapper.find(). Just state.
+import { store } from './store.js';
+
+test('addTask creates a task and increments count', () =&gt; {
+  store.set('intent.addTask', 'Buy milk');
+  expect(store.get('state.taskCount')).toBe(1);
+  expect(store.get('state.tasks')[0].text).toBe('Buy milk');
+});
+
+test('toggleTask flips completed', () =&gt; {
+  const id = store.get('state.tasks')[0].id;
+  store.set('intent.toggleTask', id);
+  expect(store.get('state.tasks')[0].completed).toBe(true);
+});
+
+test('filter shows only active tasks', () =&gt; {
+  store.set('intent.addTask', 'Walk dog');
+  store.set('intent.changeFilter', 'active');
+  const filtered = store.get('derived.tasks.filtered');
+  expect(filtered.every(t =&gt; !t.completed)).toBe(true);
+});
+
+test('deleteTask removes task and decrements count', () =&gt; {
+  const before = store.get('state.taskCount');
+  const id = store.get('state.tasks')[0].id;
+  store.set('intent.deleteTask', id);
+  expect(store.get('state.taskCount')).toBe(before - 1);
+});</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- THE ADAPTER SOURCE -->
+  <!-- ============================================================ -->
+
+  <div class="adapter-source">
+    <h2>The Entire Vue Adapter (~40 lines)</h2>
+    <p>This is the full source of <code>@everystate/vue</code>. No hidden abstractions.</p>
+
+    <div class="file-block">
+      <div class="file-block-header">
+        <span class="file-icon">&#9679;</span> @everystate/vue/eventStateVue.js
+        <span class="file-badge">adapter source</span>
+      </div>
+      <pre><code>import { ref, computed, onMounted, onBeforeUnmount, provide, inject } from 'vue';
+
+const STORE_KEY = Symbol('everystate');
+
+// -- Dependency injection --
+
+export function provideStore(store) {
+  provide(STORE_KEY, store);
+}
+
+export function useStore() {
+  const store = inject(STORE_KEY);
+  if (!store) {
+    throw new Error(
+      'useStore: no store found. Call provideStore(store) in an ancestor setup().'
+    );
+  }
+  return store;
+}
+
+// -- Read a single path --
+
+export function usePath(path) {
+  const store = useStore();
+  const value = ref(store.get(path));
+  let unsub = null;
+
+  onMounted(() =&gt; {
+    unsub = store.subscribe(path, (val) =&gt; {
+      value.value = val;
+    });
+  });
+
+  onBeforeUnmount(() =&gt; { if (unsub) unsub(); });
+
+  return computed(() =&gt; value.value);
+}
+
+// -- Publish to a path --
+
+export function useIntent(path) {
+  const store = useStore();
+  return (value) =&gt; store.set(path, value);
+}
+
+// -- Wildcard subscription --
+
+export function useWildcard(wildcardPath) {
+  const store = useStore();
+  const parentPath = wildcardPath.endsWith('.*')
+    ? wildcardPath.slice(0, -2)
+    : wildcardPath;
+
+  const value = ref(store.get(parentPath));
+  let unsub = null;
+
+  onMounted(() =&gt; {
+    unsub = store.subscribe(wildcardPath, () =&gt; {
+      value.value = store.get(parentPath);
+    });
+  });
+
+  onBeforeUnmount(() =&gt; { if (unsub) unsub(); });
+
+  return computed(() =&gt; value.value);
+}
+
+// -- Async with status tracking --
+
+export function useAsync(path) {
+  const store = useStore();
+  const data   = usePath(`${path}.data`);
+  const status = usePath(`${path}.status`);
+  const error  = usePath(`${path}.error`);
+
+  const execute = (fetcher) =&gt; store.setAsync(path, fetcher);
+  const cancel  = () =&gt; store.cancel(path);
+
+  return { data, status, error, execute, cancel };
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- KEY TAKEAWAYS -->
+  <!-- ============================================================ -->
+
+  <h2 style="border:none; text-align:center; margin-top:2rem;">Key Takeaways</h2>
+
+  <div class="why-grid">
+    <div class="why-item">
+      <h4>Store lives outside Vue</h4>
+      <p>Created once in <code>store.js</code>. Independent lifecycle. No <code>defineStore</code>, no <code>reactive()</code> wrapper.</p>
+    </div>
+    <div class="why-item">
+      <h4>Components are thin</h4>
+      <p><code>usePath</code> reads, <code>useIntent</code> writes. Components never compute or mutate state directly.</p>
+    </div>
+    <div class="why-item">
+      <h4>Logic is in subscribers</h4>
+      <p>All business rules live in <code>store.subscribe()</code> handlers. Testable without mounting any component.</p>
+    </div>
+    <div class="why-item">
+      <h4>Vue reactivity still works</h4>
+      <p><code>usePath</code> returns a <code>computed</code> ref. Templates react normally. <code>v-for</code>, <code>v-if</code>, <code>:class</code> all work as expected.</p>
+    </div>
+    <div class="why-item">
+      <h4>Derived state is explicit</h4>
+      <p>Filtered tasks are a subscriber that writes to <code>derived.*</code>. Components just read the result.</p>
+    </div>
+    <div class="why-item">
+      <h4>~40 lines adapter</h4>
+      <p>The entire <code>@everystate/vue</code> package is shown above. <code>ref</code> + <code>computed</code> + <code>provide/inject</code> + lifecycle hooks.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin: 2.5rem 0 1rem;">
+    <a href="vue.html" class="btn btn-primary">Full Vue API Reference</a>
+    <a href="https://www.npmjs.com/package/@everystate/vue" class="btn btn-secondary" style="margin-left:0.5rem;">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-vue" class="btn btn-secondary" style="margin-left:0.5rem;">GitHub</a>
+  </div>
+
+  <footer class="site-footer">
+    <p>MIT &copy; Ajdin Imsirovic &middot; <a href="https://www.npmjs.com/package/@everystate/vue">npm</a> &middot; <a href="https://github.com/ImsirovicAjdin/everystate-vue">GitHub</a></p>
+  </footer>
+
+</main>
+
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+</body>
+</html>

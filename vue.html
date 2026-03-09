@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@everystate/vue — API Reference</title>
+  <title>@everystate/vue - API Reference</title>
   <meta name="description" content="Vue 3 adapter for EveryState: provideStore, usePath, useIntent, useWildcard, useAsync composables.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,7 +11,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState</a>
+  <a href="/" class="logo">EveryState.js</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
@@ -54,7 +54,7 @@
 <main class="main">
 
   <h1>@everystate/vue <span class="version-badge">1.0.0</span></h1>
-  <p>Vue 3 adapter for <a href="core.html">@everystate/core</a>. Six composables — that's the entire API. ~40 lines, zero dependencies beyond Vue and the core store.</p>
+  <p>Vue 3 adapter for <a href="core.html">@everystate/core</a>. Six composables - that's the entire API. ~40 lines, zero dependencies beyond Vue and the core store.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
@@ -108,7 +108,7 @@ const setCount = useIntent('count');
   <h2 id="provideStore">provideStore(store)</h2>
   <div class="api-sig">provideStore(store: EveryStateStore) → void</div>
   <p>Makes a store available to all descendant components via Vue's <code>provide</code>/<code>inject</code>. Call this in your root component's <code>setup()</code>.</p>
-  <pre><code>// App.vue — setup()
+  <pre><code>// App.vue - setup()
 import { createEveryState } from '@everystate/core';
 import { provideStore } from '@everystate/vue';
 
@@ -142,7 +142,7 @@ const items = usePath('derived.tasks.filtered');
 
   <h2 id="useIntent">useIntent(path)</h2>
   <div class="api-sig">useIntent(path: string) → (value: any) → any</div>
-  <p>Returns a function that publishes a value to a path. Does not need to be reactive — it just writes to the store.</p>
+  <p>Returns a function that publishes a value to a path. Does not need to be reactive - it just writes to the store.</p>
   <pre><code>&lt;script setup&gt;
 import { ref } from 'vue';
 import { useIntent } from '@everystate/vue';

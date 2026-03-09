@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@everystate/css — API Reference</title>
+  <title>@everystate/css - API Reference</title>
   <meta name="description" content="State-driven CSS: reactive CSSOM engine with design tokens, typed validation, and WCAG contrast enforcement.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,7 +11,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState</a>
+  <a href="/" class="logo">EveryState.js</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
@@ -63,7 +63,7 @@
 <main class="main">
 
   <h1>@everystate/css <span class="version-badge">1.0.11</span></h1>
-  <p>State-driven CSS: reactive styling, design tokens, typed validation, and WCAG contrast enforcement — all via path-based state.</p>
+  <p>State-driven CSS: reactive styling, design tokens, typed validation, and WCAG contrast enforcement - all via path-based state.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
@@ -74,8 +74,8 @@
   <h2 id="overview">Overview</h2>
   <p><code>@everystate/css</code> has two main APIs:</p>
   <ul>
-    <li><strong>Style Engine</strong> — compiles dot-path CSS state to real <code>CSSStyleSheet</code> rules. Reactive updates, pseudo-classes, nested selectors.</li>
-    <li><strong>Design System</strong> — stores design tokens in the EveryState store. Token changes propagate to styles. Bulk theme swaps.</li>
+    <li><strong>Style Engine</strong> - compiles dot-path CSS state to real <code>CSSStyleSheet</code> rules. Reactive updates, pseudo-classes, nested selectors.</li>
+    <li><strong>Design System</strong> - stores design tokens in the EveryState store. Token changes propagate to styles. Bulk theme swaps.</li>
   </ul>
   <p>Both use the same <code>get</code>/<code>set</code>/<code>subscribe</code> pattern as the core store. CSS rules are state. Tokens are state. Themes are state transitions.</p>
 
@@ -118,11 +118,11 @@ store.set('css..input:focus.outline', '2px solid #3b82f6');
 // .input:focus { outline: 2px solid #3b82f6; }</code></pre>
 
   <h2 id="reactive-updates">Reactive Updates</h2>
-  <p>Because CSS rules are state, changing a value reactively updates the stylesheet — no class toggling, no inline styles:</p>
+  <p>Because CSS rules are state, changing a value reactively updates the stylesheet - no class toggling, no inline styles:</p>
   <pre><code>// Initial
 store.set('css..card.backgroundColor', '#1e293b');
 
-// Later — the stylesheet rule updates in place
+// Later - the stylesheet rule updates in place
 store.set('css..card.backgroundColor', '#0f172a');</code></pre>
 
   <!-- ═══ Design System ═══ -->
@@ -148,7 +148,7 @@ const ds = createDesignSystem(store);</code></pre>
 // Read a token
 ds.getToken('color.primary'); // '#3b82f6'
 
-// Tokens are reactive — change a token, styles update
+// Tokens are reactive - change a token, styles update
 store.set('token.color.primary', '#ef4444');</code></pre>
 
   <h2 id="theme-switching">Theme Switching</h2>
@@ -165,7 +165,7 @@ store.set('token.color.primary', '#ef4444');</code></pre>
   }
 };
 
-// Bulk theme swap — all tokens update atomically
+// Bulk theme swap - all tokens update atomically
 ds.applyTheme(themes.dark);
 
 // Toggle

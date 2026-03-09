@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tutorial — EveryState</title>
+  <title>Tutorial - EveryState</title>
   <meta name="description" content="Step-by-step tutorial for EveryState: learn path-based state management from scratch.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,7 +11,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState</a>
+  <a href="/" class="logo">EveryState.js</a>
   <nav>
     <a href="tutorial.html" class="active">Tutorial</a>
     <a href="core.html">Core</a>
@@ -63,7 +63,7 @@
 
   <div class="callout callout-info">
     <strong>Prerequisites</strong>
-    Node.js 18+ and npm. Familiarity with JavaScript. No framework knowledge required — we'll show React and Vue integration as optional steps.
+    Node.js 18+ and npm. Familiarity with JavaScript. No framework knowledge required - we'll show React and Vue integration as optional steps.
   </div>
 
   <!-- ═══ Step 1: Install ═══ -->
@@ -238,7 +238,7 @@ store.setMany({
   <!-- ═══ Three Namespaces ═══ -->
   <h2 id="namespaces">Three Namespaces Pattern</h2>
 
-  <p>The recommended convention for structuring your store. This is not enforced — it's a pattern that scales well:</p>
+  <p>The recommended convention for structuring your store. This is not enforced - it's a pattern that scales well:</p>
 
   <table>
     <thead><tr><th>Namespace</th><th>Purpose</th><th>Who writes</th><th>Who reads</th></tr></thead>
@@ -266,7 +266,7 @@ store.subscribe('intent.addTask', (text) =&gt; {
 
   <div class="callout callout-tip">
     <strong>Model–View–Intent (MVI)</strong>
-    <code>state.*</code> is the Model, <code>derived.*</code> is the ViewModel, <code>intent.*</code> is the Controller. All inside a single flat state tree. Components just read and publish — they never compute.
+    <code>state.*</code> is the Model, <code>derived.*</code> is the ViewModel, <code>intent.*</code> is the Controller. All inside a single flat state tree. Components just read and publish - they never compute.
   </div>
 
   <!-- ═══ React ═══ -->
@@ -306,7 +306,7 @@ function App() {
 
   <pre><code>npm install @everystate/vue</code></pre>
 
-  <pre><code>// eventStateVue.js — the composables
+  <pre><code>// eventStateVue.js - the composables
 import { provideStore, usePath, useIntent } from '@everystate/vue';
 
 // App.vue setup()
@@ -376,14 +376,14 @@ store.subscribe('state.tasks', recomputeFiltered);
 store.subscribe('state.filter', recomputeFiltered);
 recomputeFiltered(); // initial computation</code></pre>
 
-  <p>Components read from <code>derived.*</code> — they never compute. This keeps views pure and logic testable.</p>
+  <p>Components read from <code>derived.*</code> - they never compute. This keeps views pure and logic testable.</p>
 
   <!-- ═══ CSS State ═══ -->
   <h2 id="css-state">State-Driven CSS</h2>
 
   <pre><code>npm install @everystate/css</code></pre>
 
-  <p><code>@everystate/css</code> lets you write CSS rules as state paths. Design tokens, theme switching, and reactive styles — all through the same <code>get</code>/<code>set</code>/<code>subscribe</code> pattern.</p>
+  <p><code>@everystate/css</code> lets you write CSS rules as state paths. Design tokens, theme switching, and reactive styles - all through the same <code>get</code>/<code>set</code>/<code>subscribe</code> pattern.</p>
 
   <pre><code>import { createEveryState } from '@everystate/core';
 import { createDesignSystem } from '@everystate/css';
@@ -398,7 +398,7 @@ ds.setTokens({
   'spacing.md': '1rem',
 });
 
-// Tokens are reactive — change a token, styles update
+// Tokens are reactive - change a token, styles update
 store.set('token.color.primary', '#ef4444');</code></pre>
 
   <p><a href="css.html">Full CSS API Reference →</a></p>
@@ -439,11 +439,11 @@ t.assertEventFired('user.name', 1);</code></pre>
   <h2 id="next-steps">Next Steps</h2>
 
   <ul>
-    <li><a href="core.html"><strong>Core API Reference</strong></a> — full API docs for <code>@everystate/core</code></li>
-    <li><a href="react.html"><strong>React Integration</strong></a> — hooks, patterns, and testing</li>
-    <li><a href="vue.html"><strong>Vue Integration</strong></a> — composables and Pinia comparison</li>
-    <li><a href="css.html"><strong>CSS Engine</strong></a> — design tokens, reactive CSSOM, theming</li>
-    <li><a href="ecosystem.html"><strong>Full Ecosystem</strong></a> — router, renderer, view, perf, types, aliases</li>
+    <li><a href="core.html"><strong>Core API Reference</strong></a> - full API docs for <code>@everystate/core</code></li>
+    <li><a href="react.html"><strong>React Integration</strong></a> - hooks, patterns, and testing</li>
+    <li><a href="vue.html"><strong>Vue Integration</strong></a> - composables and Pinia comparison</li>
+    <li><a href="css.html"><strong>CSS Engine</strong></a> - design tokens, reactive CSSOM, theming</li>
+    <li><a href="ecosystem.html"><strong>Full Ecosystem</strong></a> - router, renderer, view, perf, types, aliases</li>
   </ul>
 
   <footer class="site-footer">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ecosystem — EveryState</title>
+  <title>Ecosystem - EveryState</title>
   <meta name="description" content="Complete ecosystem reference for EveryState: router, renderer, view, perf, test, aliases, types, and examples.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,7 +11,7 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState</a>
+  <a href="/" class="logo">EveryState.js</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
@@ -91,8 +91,8 @@
 
   <h3>How it works</h3>
   <ol>
-    <li><strong>Resolve</strong> — a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
-    <li><strong>Project</strong> — diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
+    <li><strong>Resolve</strong> - a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
+    <li><strong>Project</strong> - diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
   </ol>
 
   <pre><code>import { createEveryState } from '@everystate/core';
@@ -120,7 +120,7 @@ const app = createApp(store, document.getElementById('app'));</code></pre>
   <!-- RENDERER -->
   <!-- ═══════════════════════════════════════════════ -->
   <h2 id="renderer">@everystate/renderer <span class="version-badge">1.0.3</span></h2>
-  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes — the renderer connects them to your store. Zero build step.</p>
+  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes - the renderer connects them to your store. Zero build step.</p>
 
   <div class="install-wrap">
     <pre><code>npm install @everystate/renderer @everystate/core</code></pre>
@@ -313,7 +313,7 @@ type Paths = DotPaths&lt;AppState&gt;;
   <!-- EXAMPLES -->
   <!-- ═══════════════════════════════════════════════ -->
   <h2 id="examples">@everystate/examples <span class="version-badge">1.0.0</span></h2>
-  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file — no build step needed.</p>
+  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file - no build step needed.</p>
 
   <div class="install-wrap">
     <pre><code>npm install @everystate/examples</code></pre>
