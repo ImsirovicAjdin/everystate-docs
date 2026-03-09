@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@everystate/core API Reference</title>
+  <title>@everystate/core — API Reference</title>
+  <meta name="description" content="Complete API reference for @everystate/core: createEveryState, get, set, subscribe, setAsync, batch, destroy, and query client.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
 </head>
@@ -12,14 +13,16 @@
 <header class="site-header">
   <a href="/" class="logo">EveryState</a>
   <nav>
+    <a href="tutorial.html">Tutorial</a>
     <a href="core.html" class="active">Core</a>
     <a href="css.html">CSS</a>
     <a href="react.html">React</a>
-    <a href="test.html">Testing</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
   </nav>
   <div class="header-right">
-    <a href="https://github.com/ImsirovicAjdin/everystate-core/stargazers" class="star-link">★ Star</a>
     <a href="https://www.npmjs.com/package/@everystate/core">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-core" class="star-link">★ Star</a>
     <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
   </div>
 </header>
@@ -30,12 +33,14 @@
     <li><a href="#install">Install</a></li>
     <li><a href="#quick-start">Quick Start</a></li>
   </ul>
-  <h3>API</h3>
+  <h3>Store API</h3>
   <ul>
     <li><a href="#createEveryState">createEveryState</a></li>
     <li><a href="#get">store.get</a></li>
     <li><a href="#set">store.set</a></li>
     <li><a href="#subscribe">store.subscribe</a></li>
+    <li><a href="#setMany">store.setMany</a></li>
+    <li><a href="#batch">store.batch</a></li>
     <li><a href="#setAsync">store.setAsync</a></li>
     <li><a href="#cancel">store.cancel</a></li>
     <li><a href="#destroy">store.destroy</a></li>
@@ -45,31 +50,32 @@
     <li><a href="#query-client">createQueryClient</a></li>
     <li><a href="#qc-query">qc.query</a></li>
     <li><a href="#qc-subscribe">qc.subscribe</a></li>
-    <li><a href="#qc-getdata">qc.getData / getStatus / getError</a></li>
+    <li><a href="#qc-getdata">qc.getData / getStatus</a></li>
     <li><a href="#qc-cancel">qc.cancel / invalidate</a></li>
   </ul>
   <h3>Patterns</h3>
   <ul>
     <li><a href="#wildcards">Wildcards</a></li>
     <li><a href="#async-patterns">Async Patterns</a></li>
+    <li><a href="#notification-order">Notification Order</a></li>
   </ul>
 </aside>
 
 <main class="main">
 
-  <h1>@everystate/core <span class="version-badge">1.0.0</span></h1>
-  <p>Path-based state management with wildcard subscriptions and async support. ~6 KB, zero dependencies.</p>
+  <h1>@everystate/core <span class="version-badge">1.0.7</span></h1>
+  <p>Path-based state management with wildcard subscriptions, async support, batch updates, and query client. ~6 KB, zero dependencies.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
-    <pre><code>npm i @everystate/core</code></pre>
+    <pre><code>npm install @everystate/core</code></pre>
     <button class="copy-btn" onclick="__copy('npm install @everystate/core', this)">Copy</button>
   </div>
 
   <h2 id="quick-start">Quick Start</h2>
-  <pre><code>import { createEventState } from '@everystate/core';
+  <pre><code>import { createEveryState } from '@everystate/core';
 
-const store = createEventState({ count: 0, user: { name: 'Alice' } });
+const store = createEveryState({ count: 0, user: { name: 'Alice' } });
 
 // Subscribe to a path
 const unsub = store.subscribe('count', (value) =&gt; {
@@ -83,20 +89,23 @@ store.get('count');           // 1
 // Cleanup
 unsub();</code></pre>
 
+  <!-- ═══ createEveryState ═══ -->
   <h2 id="createEveryState">createEveryState(initialState)</h2>
-  <div class="api-sig">createEventState(initial?: object) → store</div>
+  <div class="api-sig">createEveryState(initial?: object) → store</div>
   <p>Creates a new reactive store. The initial state is deep-cloned.</p>
-  <pre><code>const store = createEventState({ count: 0 });
-const empty = createEventState(); // empty store, add paths later</code></pre>
+  <pre><code>const store = createEveryState({ count: 0 });
+const empty = createEveryState(); // empty store, add paths later</code></pre>
 
+  <!-- ═══ get ═══ -->
   <h2 id="get">store.get(path?)</h2>
   <div class="api-sig">store.get(path?: string) → any</div>
-  <p>Retrieve a value by dot-separated path. Returns the entire state if no path is provided. Returns <code>undefined</code> for non-existent paths (no errors).</p>
+  <p>Retrieve a value by dot-separated path. Returns the entire state if no path is provided. Returns <code>undefined</code> for non-existent paths.</p>
   <pre><code>store.get('user.name');     // 'Alice'
 store.get('user');          // { name: 'Alice' }
 store.get();                // entire state object
 store.get('no.such.path');  // undefined</code></pre>
 
+  <!-- ═══ set ═══ -->
   <h2 id="set">store.set(path, value)</h2>
   <div class="api-sig">store.set(path: string, value: any) → value</div>
   <p>Set a value at a path and notify all matching subscribers. Creates intermediate objects if they don't exist. Returns the value that was set.</p>
@@ -104,14 +113,7 @@ store.get('no.such.path');  // undefined</code></pre>
 store.set('user.email', 'alice@example.com'); // creates 'email' key on user
 store.set('deep.nested.path', true);          // creates deep, deep.nested</code></pre>
 
-  <h3>Notification order</h3>
-  <p>When you call <code>store.set('user.name', 'Bob')</code>, subscribers fire in this order:</p>
-  <ol>
-    <li><strong>Exact</strong> — subscribers on <code>'user.name'</code></li>
-    <li><strong>Wildcard</strong> — subscribers on <code>'user.*'</code></li>
-    <li><strong>Global</strong> — subscribers on <code>'*'</code></li>
-  </ol>
-
+  <!-- ═══ subscribe ═══ -->
   <h2 id="subscribe">store.subscribe(path, handler)</h2>
   <div class="api-sig">store.subscribe(path: string, handler: Function) → unsubscribe</div>
   <p>Subscribe to changes at a path. Returns a function that removes the subscription.</p>
@@ -128,7 +130,6 @@ store.set('deep.nested.path', true);          // creates deep, deep.nested</code
   console.log(`${path} changed to`, value);
 });
 
-// Fires when any direct child of 'user' changes:
 store.set('user.name', 'Bob');   // fires
 store.set('user.email', 'x');    // fires
 store.set('count', 1);           // does NOT fire</code></pre>
@@ -137,8 +138,29 @@ store.set('count', 1);           // does NOT fire</code></pre>
   <pre><code>store.subscribe('*', ({ path, value }) =&gt; {
   console.log(`[state] ${path} =`, value);
 });
-// Fires on every set() call, useful for logging/telemetry</code></pre>
+// Fires on every set() call — useful for logging/telemetry</code></pre>
 
+  <!-- ═══ setMany ═══ -->
+  <h2 id="setMany">store.setMany(entries)</h2>
+  <div class="api-sig">store.setMany(entries: object) → void</div>
+  <p>Set multiple paths atomically. Equivalent to calling <code>set()</code> for each entry inside a <code>batch()</code>.</p>
+  <pre><code>store.setMany({
+  'ui.route.view': 'dashboard',
+  'ui.route.path': '/dashboard',
+  'ui.route.params': {},
+});</code></pre>
+
+  <!-- ═══ batch ═══ -->
+  <h2 id="batch">store.batch(fn)</h2>
+  <div class="api-sig">store.batch(fn: () → void) → void</div>
+  <p>Group multiple <code>set()</code> calls. Subscribers are deferred until the batch completes. Each subscriber fires at most once per batch.</p>
+  <pre><code>store.batch(() =&gt; {
+  store.set('form.name', 'Alice');
+  store.set('form.email', 'a@b.com');
+});
+// subscribers fire once after both updates</code></pre>
+
+  <!-- ═══ setAsync ═══ -->
   <h2 id="setAsync">store.setAsync(path, fetcher)</h2>
   <div class="api-sig">store.setAsync(path: string, fetcher: (signal: AbortSignal) → Promise) → Promise</div>
   <p>Run an async operation with automatic status tracking. Manages three sub-paths:</p>
@@ -157,25 +179,27 @@ store.set('count', 1);           // does NOT fire</code></pre>
 
 store.get('users.status'); // 'success'
 store.get('users.data');   // [...]</code></pre>
-
   <p>If <code>setAsync</code> is called again on the same path while a previous call is still in-flight, the previous call is automatically aborted.</p>
 
+  <!-- ═══ cancel ═══ -->
   <h2 id="cancel">store.cancel(path)</h2>
   <div class="api-sig">store.cancel(path: string) → void</div>
   <p>Abort an in-flight <code>setAsync</code> operation. Sets status to <code>'cancelled'</code>.</p>
   <pre><code>store.setAsync('users', fetcher); // starts loading
 store.cancel('users');            // aborts, status → 'cancelled'</code></pre>
 
+  <!-- ═══ destroy ═══ -->
   <h2 id="destroy">store.destroy()</h2>
   <div class="api-sig">store.destroy() → void</div>
-  <p>Tear down the store. Aborts all in-flight async operations, clears all subscriptions. Any further calls to <code>get</code>, <code>set</code>, or <code>subscribe</code> will throw.</p>
+  <p>Tear down the store. Aborts all in-flight async operations, clears all subscriptions. Any further calls throw.</p>
 
+  <!-- ═══ Query Client ═══ -->
   <h2 id="query-client">Query Client</h2>
   <p>A convenience wrapper around <code>setAsync</code> for data-fetching patterns. Uses the <code>query.${key}</code> namespace internally.</p>
-  <pre><code>import { createEventState } from '@everystate/core';
+  <pre><code>import { createEveryState } from '@everystate/core';
 import { createQueryClient } from '@everystate/core/query';
 
-const store = createEventState();
+const store = createEveryState();
 const qc = createQueryClient(store);</code></pre>
 
   <h3 id="qc-query">qc.query(key, fetcher)</h3>
@@ -198,6 +222,7 @@ qc.getError('users');   // null or error message</code></pre>
   <pre><code>qc.cancel('users');     // abort in-flight request
 qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
 
+  <!-- ═══ Wildcards ═══ -->
   <h2 id="wildcards">Wildcard Patterns</h2>
   <p>When <code>store.set('user.profile.name', 'Bob')</code> is called, these subscribers fire:</p>
   <table>
@@ -211,14 +236,24 @@ qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
       <tr><td><code>'user'</code></td><td>No</td><td>—</td></tr>
     </tbody>
   </table>
-  <p>Wildcards match on <strong>parent paths</strong>, not the exact path being set. This mirrors how DOM event bubbling works.</p>
+  <p>Wildcards match on <strong>parent paths</strong>, not the exact path being set. This mirrors DOM event bubbling.</p>
 
+  <!-- ═══ Notification Order ═══ -->
+  <h2 id="notification-order">Notification Order</h2>
+  <p>When you call <code>store.set('user.name', 'Bob')</code>, subscribers fire in this order:</p>
+  <ol>
+    <li><strong>Exact</strong> — subscribers on <code>'user.name'</code></li>
+    <li><strong>Parent wildcard</strong> — subscribers on <code>'user.*'</code></li>
+    <li><strong>Grandparent wildcard</strong> — subscribers on <code>'*'</code></li>
+  </ol>
+
+  <!-- ═══ Async Patterns ═══ -->
   <h2 id="async-patterns">Async Patterns</h2>
+
   <h3>Loading indicator</h3>
   <pre><code>store.subscribe('users.status', (status) =&gt; {
   spinner.hidden = status !== 'loading';
 });
-
 store.setAsync('users', fetchUsers);</code></pre>
 
   <h3>Race condition handling</h3>
@@ -237,10 +272,15 @@ input.addEventListener('input', () =&gt; {
   if (err.name === 'AbortError') return; // cancelled, ignore
   console.error('Fetch failed:', err);
 }
+
 // Or subscribe to the error path:
 store.subscribe('users.error', (msg) =&gt; {
   if (msg) showToast(`Error: ${msg}`);
 });</code></pre>
+
+  <footer class="site-footer">
+    <p>MIT © Ajdin Imsirovic · <a href="https://www.npmjs.com/package/@everystate/core">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-core">GitHub</a></p>
+  </footer>
 
 </main>
 

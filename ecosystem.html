@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecosystem — EveryState</title>
+  <meta name="description" content="Complete ecosystem reference for EveryState: router, renderer, view, perf, test, aliases, types, and examples.">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html" class="active">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://github.com/ImsirovicAjdin" class="star-link">★ GitHub</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <h3>Core</h3>
+  <ul>
+    <li><a href="core.html">@everystate/core</a></li>
+    <li><a href="css.html">@everystate/css</a></li>
+    <li><a href="#view">@everystate/view</a></li>
+  </ul>
+  <h3>Framework Adapters</h3>
+  <ul>
+    <li><a href="react.html">@everystate/react</a></li>
+    <li><a href="vue.html">@everystate/vue</a></li>
+  </ul>
+  <h3>Tools</h3>
+  <ul>
+    <li><a href="#renderer">@everystate/renderer</a></li>
+    <li><a href="#router">@everystate/router</a></li>
+    <li><a href="#perf">@everystate/perf</a></li>
+    <li><a href="#test">@everystate/test</a></li>
+  </ul>
+  <h3>Utilities</h3>
+  <ul>
+    <li><a href="#aliases">@everystate/aliases</a></li>
+    <li><a href="#types">@everystate/types</a></li>
+    <li><a href="#examples">@everystate/examples</a></li>
+  </ul>
+</aside>
+
+<main class="main">
+
+  <h1>Ecosystem</h1>
+  <p>Every package is MIT-licensed, independently versioned, and has zero third-party dependencies. Install only what you need.</p>
+
+  <table class="ecosystem-table">
+    <thead>
+      <tr><th>Package</th><th>Description</th><th>License</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><a href="core.html">@everystate/core</a></td><td>Path-based state management with wildcard subscriptions and async support</td><td>MIT</td></tr>
+      <tr><td><a href="css.html">@everystate/css</a></td><td>Reactive CSSOM engine: design tokens, typed validation, WCAG enforcement</td><td>MIT</td></tr>
+      <tr><td><a href="#view">@everystate/view</a></td><td>State-driven view: DOMless resolve + surgical DOM projector</td><td>MIT</td></tr>
+      <tr><td><a href="react.html">@everystate/react</a></td><td>React 18 hooks adapter</td><td>MIT</td></tr>
+      <tr><td><a href="vue.html">@everystate/vue</a></td><td>Vue 3 composables adapter</td><td>MIT</td></tr>
+      <tr><td><a href="#renderer">@everystate/renderer</a></td><td>Direct-binding reactive renderer. Zero build step</td><td>MIT</td></tr>
+      <tr><td><a href="#router">@everystate/router</a></td><td>SPA routing as state</td><td>MIT</td></tr>
+      <tr><td><a href="#perf">@everystate/perf</a></td><td>Performance monitoring overlay</td><td>MIT</td></tr>
+      <tr><td><a href="#test">@everystate/test</a></td><td>Event-sequence testing for stores</td><td>MIT</td></tr>
+      <tr><td><a href="#aliases">@everystate/aliases</a></td><td>Ergonomic DOM aliases for vanilla JS</td><td>MIT</td></tr>
+      <tr><td><a href="#types">@everystate/types</a></td><td>Typed dot-path autocomplete for TypeScript</td><td>MIT</td></tr>
+      <tr><td><a href="#examples">@everystate/examples</a></td><td>Example applications and patterns</td><td>MIT</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- VIEW -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="view">@everystate/view <span class="version-badge">1.1.1</span></h2>
+  <p>DOM structure as first-class state. Describe your view tree as a plain object in the store, then project it to the real DOM with surgical updates.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/view @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/view @everystate/core', this)">Copy</button>
+  </div>
+
+  <h3>How it works</h3>
+  <ol>
+    <li><strong>Resolve</strong> — a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
+    <li><strong>Project</strong> — diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
+  </ol>
+
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { createApp } from '@everystate/view/app';
+
+const store = createEveryState({});
+
+// Define your view as state
+store.set('view.root', {
+  tag: 'div',
+  children: [
+    { tag: 'h1', text: 'Hello' },
+    { tag: 'p', text: 'World' },
+  ]
+});
+
+// Mount and project
+const app = createApp(store, document.getElementById('app'));</code></pre>
+
+  <p>View nodes support: <code>tag</code>, <code>text</code>, <code>children</code>, <code>attrs</code>, <code>style</code>, <code>events</code>, and text interpolation with <code>{store.path}</code> syntax.</p>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/view">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-view">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- RENDERER -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="renderer">@everystate/renderer <span class="version-badge">1.0.3</span></h2>
+  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes — the renderer connects them to your store. Zero build step.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/renderer @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/renderer @everystate/core', this)">Copy</button>
+  </div>
+
+  <pre><code>&lt;div id="app"&gt;
+  &lt;h1 bind-text="user.name"&gt;&lt;/h1&gt;
+  &lt;input bind-value="user.name" set="user.name" /&gt;
+  &lt;ul each="tasks" as="task"&gt;
+    &lt;li bind-text="task.text"&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;script type="module"&gt;
+  import { createEveryState } from '@everystate/core';
+  import { mount } from '@everystate/renderer';
+
+  const store = createEveryState({
+    user: { name: 'Alice' },
+    tasks: [{ text: 'Buy milk' }, { text: 'Walk dog' }]
+  });
+
+  mount(store, document.getElementById('app'));
+&lt;/script&gt;</code></pre>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/renderer">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-renderer">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- ROUTER -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="router">@everystate/router <span class="version-badge">1.0.6</span></h2>
+  <p>SPA routing as state. Routes, params, query strings, and navigation history live in your EveryState store at <code>ui.route.*</code>.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/router @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/router @everystate/core', this)">Copy</button>
+  </div>
+
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { createRouter } from '@everystate/router';
+
+const store = createEveryState({});
+
+const router = createRouter(store, {
+  routes: [
+    { path: '/', view: 'home' },
+    { path: '/about', view: 'about' },
+    { path: '/user/:id', view: 'userProfile' },
+  ]
+});
+
+// Read the current route from state
+store.subscribe('ui.route.*', ({ path, value }) =&gt; {
+  console.log('Route changed:', store.get('ui.route.view'));
+});
+
+// Navigate via state
+store.set('intent.navigate', '/about');</code></pre>
+
+  <p>Route params are available at <code>ui.route.params</code>, query strings at <code>ui.route.query</code>. The router syncs with <code>history.pushState</code> automatically.</p>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/router">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-router">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- PERF -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="perf">@everystate/perf <span class="version-badge">1.0.4</span></h2>
+  <p>Non-invasive performance monitoring for EveryState stores. Method wrapping, path heatmaps, timeline recording, and a browser overlay.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/perf @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/perf @everystate/core', this)">Copy</button>
+  </div>
+
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { createPerfMonitor } from '@everystate/perf';
+
+const store = createEveryState({ count: 0 });
+const perf = createPerfMonitor(store);
+
+// perf.showOverlay(); // browser overlay with live metrics
+// perf.getHeatmap();  // which paths are set/read most
+// perf.getTimeline(); // chronological event log</code></pre>
+
+  <p>Uses the prepend pattern: wraps store methods without modifying them. Remove the import and your app runs exactly the same.</p>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/perf">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-perf">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TEST -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="test">@everystate/test <span class="version-badge">1.0.4</span></h2>
+  <p>Event-sequence testing library for EveryState stores. Trigger state changes and assert values, types, shapes, and event firings. Zero dependency.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/test @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/test @everystate/core', this)">Copy</button>
+  </div>
+
+  <pre><code>import { createEventTest, runTests } from '@everystate/test';
+
+const results = runTests({
+  'adding a task increments count': () =&gt; {
+    const t = createEventTest({ state: { tasks: [], taskCount: 0 } });
+    t.trigger('state.tasks', [{ id: 1, text: 'test' }]);
+    t.trigger('state.taskCount', 1);
+    t.assertPath('state.taskCount', 1);
+    t.assertType('state.taskCount', 'number');
+    t.assertEventFired('state.taskCount', 1);
+  },
+
+  'user shape is correct': () =&gt; {
+    const t = createEventTest({ user: { name: 'Alice', age: 30 } });
+    t.assertShape('user', { name: 'string', age: 'number' });
+  },
+});
+
+if (results.failed &gt; 0) process.exit(1);</code></pre>
+
+  <h3>Assertion API</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>t.assertPath(path, expected)</code></td><td>Assert value at path (deep equality)</td></tr>
+      <tr><td><code>t.assertType(path, type)</code></td><td>Assert JS type at path</td></tr>
+      <tr><td><code>t.assertShape(path, shape)</code></td><td>Assert object shape (keys → types)</td></tr>
+      <tr><td><code>t.assertArrayOf(path, shape)</code></td><td>Assert array element shape</td></tr>
+      <tr><td><code>t.assertEventFired(path, n)</code></td><td>Assert event fire count</td></tr>
+      <tr><td><code>t.trigger(path, value)</code></td><td>Set value and track event</td></tr>
+    </tbody>
+  </table>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/test">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-test">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- ALIASES -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="aliases">@everystate/aliases <span class="version-badge">1.0.3</span></h2>
+  <p>Ergonomic single-character and short-name DOM aliases for vanilla JavaScript. Write less boilerplate when working with the DOM directly.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/aliases</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/aliases', this)">Copy</button>
+  </div>
+
+  <pre><code>import { $, $$, el, on, attr } from '@everystate/aliases';
+
+// $ = document.querySelector
+const btn = $('#submit');
+
+// $$ = document.querySelectorAll
+const items = $$('.list-item');
+
+// el = document.createElement
+const div = el('div');
+
+// on = addEventListener shorthand
+on(btn, 'click', () =&gt; console.log('clicked'));
+
+// attr = set/get attributes
+attr(div, 'data-active', 'true');</code></pre>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/aliases">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-aliases">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TYPES -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="types">@everystate/types <span class="version-badge">1.0.3</span></h2>
+  <p>Typed dot-path autocomplete for EveryState stores via recursive TypeScript template-literal types. Get <code>store.get('user.profile.name')</code> autocomplete in your IDE.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/types</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/types', this)">Copy</button>
+  </div>
+
+  <pre><code>import type { DotPaths } from '@everystate/types';
+
+interface AppState {
+  user: { name: string; profile: { avatar: string } };
+  tasks: { id: number; text: string }[];
+}
+
+type Paths = DotPaths&lt;AppState&gt;;
+// "user" | "user.name" | "user.profile" | "user.profile.avatar" | "tasks" | ...</code></pre>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/types">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-types">GitHub</a></p>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- EXAMPLES -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <h2 id="examples">@everystate/examples <span class="version-badge">1.0.0</span></h2>
+  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file — no build step needed.</p>
+
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/examples</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/examples', this)">Copy</button>
+  </div>
+
+  <p>Includes examples for:</p>
+  <ul>
+    <li>Counter with reactive CSS</li>
+    <li>Data table with sorting, filtering, pagination, and light/dark theme toggle</li>
+    <li>Async data fetching patterns</li>
+    <li>State-driven view composition</li>
+  </ul>
+
+  <p><a href="https://www.npmjs.com/package/@everystate/examples">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-examples">GitHub</a></p>
+
+  <footer class="site-footer">
+    <p>MIT © Ajdin Imsirovic · <a href="https://www.npmjs.com/~everystate">npm</a> · <a href="https://github.com/ImsirovicAjdin">GitHub</a></p>
+  </footer>
+
+</main>
+
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+</body>
+</html>

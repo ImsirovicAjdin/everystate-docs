@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial — EveryState</title>
+  <meta name="description" content="Step-by-step tutorial for EveryState: learn path-based state management from scratch.">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState</a>
+  <nav>
+    <a href="tutorial.html" class="active">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://github.com/ImsirovicAjdin" class="star-link">★ GitHub</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <h3>Getting Started</h3>
+  <ul>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#first-store">Your First Store</a></li>
+    <li><a href="#subscribe">Subscribe to Changes</a></li>
+    <li><a href="#nested">Nested Paths</a></li>
+  </ul>
+  <h3>Core Concepts</h3>
+  <ul>
+    <li><a href="#wildcards">Wildcards</a></li>
+    <li><a href="#async">Async Operations</a></li>
+    <li><a href="#batch">Batch Updates</a></li>
+    <li><a href="#namespaces">Three Namespaces</a></li>
+  </ul>
+  <h3>Framework Integration</h3>
+  <ul>
+    <li><a href="#with-react">With React</a></li>
+    <li><a href="#with-vue">With Vue</a></li>
+    <li><a href="#with-vanilla">With Vanilla JS</a></li>
+  </ul>
+  <h3>Advanced</h3>
+  <ul>
+    <li><a href="#derived-state">Derived State</a></li>
+    <li><a href="#css-state">State-Driven CSS</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#next-steps">Next Steps</a></li>
+  </ul>
+</aside>
+
+<main class="main">
+
+  <h1>Tutorial</h1>
+  <p>Learn EveryState from scratch. By the end, you'll understand the core API, framework integrations, and patterns for building real applications.</p>
+
+  <div class="callout callout-info">
+    <strong>Prerequisites</strong>
+    Node.js 18+ and npm. Familiarity with JavaScript. No framework knowledge required — we'll show React and Vue integration as optional steps.
+  </div>
+
+  <!-- ═══ Step 1: Install ═══ -->
+  <h2 id="install">Install</h2>
+
+  <div class="step">
+    <span class="step-num">Step 1</span>
+    <h3>Install the core package</h3>
+    <div class="install-wrap">
+      <pre><code>npm install @everystate/core</code></pre>
+      <button class="copy-btn" onclick="__copy('npm install @everystate/core', this)">Copy</button>
+    </div>
+    <p>Or use it directly in a browser with no build step:</p>
+    <pre><code>&lt;script type="module"&gt;
+  import { createEveryState } from 'https://esm.sh/@everystate/core';
+&lt;/script&gt;</code></pre>
+  </div>
+
+  <!-- ═══ Step 2: First Store ═══ -->
+  <h2 id="first-store">Your First Store</h2>
+
+  <div class="step">
+    <span class="step-num">Step 2</span>
+    <h3>Create a store and read/write state</h3>
+    <pre><code>import { createEveryState } from '@everystate/core';
+
+// Create a store with initial state
+const store = createEveryState({
+  count: 0,
+  user: { name: 'Alice', email: 'alice@example.com' }
+});
+
+// Read a value
+store.get('count');           // 0
+store.get('user.name');       // 'Alice'
+store.get('user');            // { name: 'Alice', email: '...' }
+store.get();                  // entire state object
+
+// Write a value
+store.set('count', 42);
+store.set('user.name', 'Bob');
+
+// Creates intermediate objects automatically
+store.set('app.settings.theme', 'dark');</code></pre>
+    <p>That's the core API: <code>get(path)</code> reads, <code>set(path, value)</code> writes. Paths are dot-separated strings that address nested state.</p>
+  </div>
+
+  <!-- ═══ Step 3: Subscribe ═══ -->
+  <h2 id="subscribe">Subscribe to Changes</h2>
+
+  <div class="step">
+    <span class="step-num">Step 3</span>
+    <h3>React to state changes</h3>
+    <pre><code>// Subscribe to a specific path
+const unsub = store.subscribe('count', (value, { oldValue }) =&gt; {
+  console.log(`count changed: ${oldValue} → ${value}`);
+});
+
+store.set('count', 1);  // logs: "count changed: 0 → 1"
+store.set('count', 2);  // logs: "count changed: 1 → 2"
+
+// Stop listening
+unsub();</code></pre>
+    <p><code>subscribe</code> returns an unsubscribe function. Call it when you're done listening. The handler receives the new value and a detail object with <code>path</code>, <code>value</code>, and <code>oldValue</code>.</p>
+  </div>
+
+  <!-- ═══ Step 4: Nested Paths ═══ -->
+  <h2 id="nested">Nested Paths</h2>
+
+  <div class="step">
+    <span class="step-num">Step 4</span>
+    <h3>Work with deeply nested state</h3>
+    <pre><code>const store = createEveryState({
+  app: {
+    settings: { theme: 'light', lang: 'en' },
+    user: { name: 'Alice', profile: { avatar: '/img/alice.png' } }
+  }
+});
+
+// Read at any depth
+store.get('app.settings.theme');            // 'light'
+store.get('app.user.profile.avatar');       // '/img/alice.png'
+
+// Write at any depth
+store.set('app.settings.theme', 'dark');
+
+// Subscribe to nested path
+store.subscribe('app.user.name', (name) =&gt; {
+  document.title = `${name}'s Dashboard`;
+});</code></pre>
+    <p>There's no limit to nesting depth. Each segment in the dot path addresses one level of the state tree.</p>
+  </div>
+
+  <!-- ═══ Wildcards ═══ -->
+  <h2 id="wildcards">Wildcards</h2>
+
+  <div class="step">
+    <span class="step-num">Step 5</span>
+    <h3>Listen to groups of changes</h3>
+    <pre><code>// Fires when ANY child of 'user' changes
+store.subscribe('user.*', ({ path, value }) =&gt; {
+  console.log(`${path} changed to`, value);
+});
+
+store.set('user.name', 'Bob');    // fires ✓
+store.set('user.email', 'x');     // fires ✓
+store.set('count', 1);            // does NOT fire ✗
+
+// Global wildcard: fires on EVERY set() call
+store.subscribe('*', ({ path, value }) =&gt; {
+  console.log(`[log] ${path} =`, value);
+});</code></pre>
+  </div>
+
+  <div class="callout callout-tip">
+    <strong>How wildcards fire</strong>
+    When you call <code>store.set('user.profile.name', 'Bob')</code>, subscribers fire in order: exact (<code>user.profile.name</code>) → parent wildcard (<code>user.profile.*</code>) → grandparent wildcard (<code>user.*</code>) → global (<code>*</code>). This mirrors DOM event bubbling.
+  </div>
+
+  <!-- ═══ Async ═══ -->
+  <h2 id="async">Async Operations</h2>
+
+  <div class="step">
+    <span class="step-num">Step 6</span>
+    <h3>Fetch data with automatic status tracking</h3>
+    <pre><code>// setAsync manages loading → success/error lifecycle
+await store.setAsync('users', async (signal) =&gt; {
+  const res = await fetch('/api/users', { signal });
+  return res.json();
+});
+
+// Three sub-paths are managed automatically:
+store.get('users.status');  // 'success'
+store.get('users.data');    // [...the fetched data]
+store.get('users.error');   // null
+
+// Subscribe to status for loading spinners
+store.subscribe('users.status', (status) =&gt; {
+  spinner.hidden = status !== 'loading';
+});
+
+// Cancel an in-flight request
+store.cancel('users');  // status → 'cancelled'</code></pre>
+    <p>If <code>setAsync</code> is called again while a request is in-flight, the previous request is automatically aborted. No race conditions.</p>
+  </div>
+
+  <!-- ═══ Batch ═══ -->
+  <h2 id="batch">Batch Updates</h2>
+
+  <div class="step">
+    <span class="step-num">Step 7</span>
+    <h3>Group multiple updates</h3>
+    <pre><code>// Without batch: each set() fires subscribers immediately
+store.set('form.name', 'Alice');    // fires subscribers
+store.set('form.email', 'a@b.com'); // fires subscribers
+
+// With batch: subscribers fire once after all sets
+store.batch(() =&gt; {
+  store.set('form.name', 'Alice');
+  store.set('form.email', 'a@b.com');
+});
+// subscribers fire once here
+
+// Or use setMany for atomic multi-path updates
+store.setMany({
+  'ui.route.view': 'dashboard',
+  'ui.route.path': '/dashboard',
+  'ui.route.params': {},
+});</code></pre>
+  </div>
+
+  <!-- ═══ Three Namespaces ═══ -->
+  <h2 id="namespaces">Three Namespaces Pattern</h2>
+
+  <p>The recommended convention for structuring your store. This is not enforced — it's a pattern that scales well:</p>
+
+  <table>
+    <thead><tr><th>Namespace</th><th>Purpose</th><th>Who writes</th><th>Who reads</th></tr></thead>
+    <tbody>
+      <tr><td><code>state.*</code></td><td>Authoritative application state</td><td>Subscribers (logic)</td><td>Components</td></tr>
+      <tr><td><code>derived.*</code></td><td>Computed projections of state</td><td>Subscribers (derived)</td><td>Components</td></tr>
+      <tr><td><code>intent.*</code></td><td>Write-only signals from the UI</td><td>Components</td><td>Subscribers (logic)</td></tr>
+    </tbody>
+  </table>
+
+  <pre><code>const store = createEveryState({
+  state:   { tasks: [], filter: 'all', taskCount: 0 },
+  derived: { tasks: { filtered: [] } },
+});
+
+// UI publishes intent
+store.set('intent.addTask', 'Buy milk');
+
+// Subscriber handles business logic
+store.subscribe('intent.addTask', (text) =&gt; {
+  const tasks = store.get('state.tasks') || [];
+  store.set('state.tasks', [...tasks, { id: Date.now(), text, done: false }]);
+  store.set('state.taskCount', tasks.length + 1);
+});</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>Model–View–Intent (MVI)</strong>
+    <code>state.*</code> is the Model, <code>derived.*</code> is the ViewModel, <code>intent.*</code> is the Controller. All inside a single flat state tree. Components just read and publish — they never compute.
+  </div>
+
+  <!-- ═══ React ═══ -->
+  <h2 id="with-react">With React</h2>
+
+  <pre><code>npm install @everystate/react</code></pre>
+
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { EventStateProvider, usePath, useIntent } from '@everystate/react';
+
+// Store lives OUTSIDE React
+const store = createEveryState({ state: { count: 0 } });
+
+store.subscribe('intent.increment', () =&gt; {
+  store.set('state.count', store.get('state.count') + 1);
+});
+
+function Counter() {
+  const count = usePath('state.count');
+  const increment = useIntent('intent.increment');
+  return &lt;button onClick={() =&gt; increment(true)}&gt;Count: {count}&lt;/button&gt;;
+}
+
+function App() {
+  return (
+    &lt;EventStateProvider store={store}&gt;
+      &lt;Counter /&gt;
+    &lt;/EventStateProvider&gt;
+  );
+}</code></pre>
+
+  <p><code>usePath</code> reads from the store and re-renders only when that path changes. <code>useIntent</code> returns a stable setter. Built on React 18's <code>useSyncExternalStore</code>.</p>
+  <p><a href="react.html">Full React API Reference →</a></p>
+
+  <!-- ═══ Vue ═══ -->
+  <h2 id="with-vue">With Vue</h2>
+
+  <pre><code>npm install @everystate/vue</code></pre>
+
+  <pre><code>// eventStateVue.js — the composables
+import { provideStore, usePath, useIntent } from '@everystate/vue';
+
+// App.vue setup()
+import { createEveryState } from '@everystate/core';
+const store = createEveryState({ state: { count: 0 } });
+provideStore(store);</code></pre>
+
+  <pre><code>&lt;!-- Counter.vue --&gt;
+&lt;script setup&gt;
+import { usePath, useIntent } from '@everystate/vue';
+const count = usePath('state.count');
+const setCount = useIntent('state.count');
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button @click="setCount(count + 1)"&gt;Count: {{ count }}&lt;/button&gt;
+&lt;/template&gt;</code></pre>
+
+  <p><code>usePath</code> returns a read-only <code>computed</code> ref. Under the hood it creates a <code>ref</code>, subscribes on mount, and unsubscribes on unmount.</p>
+  <p><a href="vue.html">Full Vue API Reference →</a></p>
+
+  <!-- ═══ Vanilla JS ═══ -->
+  <h2 id="with-vanilla">With Vanilla JS</h2>
+
+  <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+  &lt;h1 id="count"&gt;0&lt;/h1&gt;
+  &lt;button id="inc"&gt;+&lt;/button&gt;
+
+  &lt;script type="module"&gt;
+    import { createEveryState } from '@everystate/core';
+
+    const store = createEveryState({ count: 0 });
+
+    store.subscribe('count', (value) =&gt; {
+      document.getElementById('count').textContent = value;
+    });
+
+    document.getElementById('inc').onclick = () =&gt; {
+      store.set('count', store.get('count') + 1);
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  <p>No framework, no build step. Works in any browser that supports ES modules.</p>
+
+  <!-- ═══ Derived State ═══ -->
+  <h2 id="derived-state">Derived State</h2>
+
+  <p>Computed values are just subscribers that write to <code>derived.*</code>:</p>
+  <pre><code>function recomputeFiltered() {
+  const tasks = store.get('state.tasks') || [];
+  const filter = store.get('state.filter');
+
+  const filtered = tasks.filter(t =&gt; {
+    if (filter === 'active') return !t.done;
+    if (filter === 'completed') return t.done;
+    return true;
+  });
+
+  store.set('derived.tasks.filtered', filtered);
+}
+
+// Recompute when source data changes
+store.subscribe('state.tasks', recomputeFiltered);
+store.subscribe('state.filter', recomputeFiltered);
+recomputeFiltered(); // initial computation</code></pre>
+
+  <p>Components read from <code>derived.*</code> — they never compute. This keeps views pure and logic testable.</p>
+
+  <!-- ═══ CSS State ═══ -->
+  <h2 id="css-state">State-Driven CSS</h2>
+
+  <pre><code>npm install @everystate/css</code></pre>
+
+  <p><code>@everystate/css</code> lets you write CSS rules as state paths. Design tokens, theme switching, and reactive styles — all through the same <code>get</code>/<code>set</code>/<code>subscribe</code> pattern.</p>
+
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { createDesignSystem } from '@everystate/css';
+
+const store = createEveryState({});
+const ds = createDesignSystem(store);
+
+// Define design tokens
+ds.setTokens({
+  'color.primary': '#3b82f6',
+  'color.bg': '#0f172a',
+  'spacing.md': '1rem',
+});
+
+// Tokens are reactive — change a token, styles update
+store.set('token.color.primary', '#ef4444');</code></pre>
+
+  <p><a href="css.html">Full CSS API Reference →</a></p>
+
+  <!-- ═══ Testing ═══ -->
+  <h2 id="testing">Testing</h2>
+
+  <p>Because business logic lives in subscribers (not components), you can test everything without mounting a single component:</p>
+
+  <pre><code>import { store } from './store.js';
+
+// No render(). No screen.getByRole(). Just state in, state out.
+test('adding a task increments count', () =&gt; {
+  const before = store.get('state.taskCount');
+  store.set('intent.addTask', 'test task');
+  expect(store.get('state.taskCount')).toBe(before + 1);
+});
+
+test('filter shows only active tasks', () =&gt; {
+  store.set('intent.addTask', 'task 1');
+  store.set('intent.addTask', 'task 2');
+  store.set('intent.toggleTask', store.get('state.tasks')[0].id);
+  store.set('intent.changeFilter', 'active');
+  expect(store.get('derived.tasks.filtered')).toHaveLength(1);
+});</code></pre>
+
+  <p>For structured test suites, use <code>@everystate/test</code>:</p>
+  <pre><code>npm install @everystate/test</code></pre>
+  <pre><code>import { createEventTest } from '@everystate/test';
+
+const t = createEventTest({ user: { name: 'Alice' } });
+t.trigger('user.name', 'Bob');
+t.assertPath('user.name', 'Bob');
+t.assertType('user.name', 'string');
+t.assertEventFired('user.name', 1);</code></pre>
+
+  <!-- ═══ Next Steps ═══ -->
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="core.html"><strong>Core API Reference</strong></a> — full API docs for <code>@everystate/core</code></li>
+    <li><a href="react.html"><strong>React Integration</strong></a> — hooks, patterns, and testing</li>
+    <li><a href="vue.html"><strong>Vue Integration</strong></a> — composables and Pinia comparison</li>
+    <li><a href="css.html"><strong>CSS Engine</strong></a> — design tokens, reactive CSSOM, theming</li>
+    <li><a href="ecosystem.html"><strong>Full Ecosystem</strong></a> — router, renderer, view, perf, types, aliases</li>
+  </ul>
+
+  <footer class="site-footer">
+    <p>MIT © Ajdin Imsirovic · <a href="https://www.npmjs.com/~everystate">npm</a> · <a href="https://github.com/ImsirovicAjdin">GitHub</a></p>
+  </footer>
+
+</main>
+
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+</body>
+</html>

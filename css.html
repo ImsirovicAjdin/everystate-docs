@@ -1,25 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@everystate/css API Reference</title>
+  <title>@everystate/css — API Reference</title>
+  <meta name="description" content="State-driven CSS: reactive CSSOM engine with design tokens, typed validation, and WCAG contrast enforcement.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
 </head>
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">ever</a>
+  <a href="/" class="logo">EveryState</a>
   <nav>
+    <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
     <a href="css.html" class="active">CSS</a>
     <a href="react.html">React</a>
-    <a href="test.html">Testing</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
   </nav>
   <div class="header-right">
-    <a href="https://github.com/ImsirovicAjdin/everystate-css/stargazers" class="star-link">★ Star</a>
     <a href="https://www.npmjs.com/package/@everystate/css">npm</a>
+    <a href="https://github.com/ImsirovicAjdin/everystate-css" class="star-link">★ Star</a>
     <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">☾</button>
   </div>
 </header>
@@ -30,52 +33,153 @@
     <li><a href="#install">Install</a></li>
     <li><a href="#overview">Overview</a></li>
   </ul>
+  <h3>Style Engine</h3>
+  <ul>
+    <li><a href="#style-engine">createStyleEngine</a></li>
+    <li><a href="#dot-path-css">Dot-Path CSS</a></li>
+    <li><a href="#pseudo-classes">Pseudo-Classes</a></li>
+    <li><a href="#reactive-updates">Reactive Updates</a></li>
+  </ul>
+  <h3>Design System</h3>
+  <ul>
+    <li><a href="#design-system">createDesignSystem</a></li>
+    <li><a href="#tokens">Design Tokens</a></li>
+    <li><a href="#theme-switching">Theme Switching</a></li>
+  </ul>
   <h3>CSS State (v1)</h3>
   <ul>
-    <li><a href="#createCssState">createCssState</a></li>
+    <li><a href="#css-state">createCssState</a></li>
     <li><a href="#setState">setState / getState</a></li>
     <li><a href="#observe">observe</a></li>
     <li><a href="#declarative">Declarative Binding</a></li>
   </ul>
-  <h3>Serializer</h3>
-  <ul>
-    <li><a href="#serializer">createSerializer</a></li>
-  </ul>
-  <h3>Template Manager</h3>
-  <ul>
-    <li><a href="#templateManager">createTemplateManager</a></li>
-  </ul>
   <h3>Use Cases</h3>
   <ul>
     <li><a href="#wordpress">WordPress</a></li>
-    <li><a href="#static-sites">Static Sites</a></li>
     <li><a href="#web-components">Web Components</a></li>
   </ul>
 </aside>
 
 <main class="main">
 
-  <h1>@everystate/css <span class="version-badge">1.0.0</span></h1>
-  <p>CSS-native state management using CSS custom properties and data attributes. No bundler, no framework — state lives in CSS and is inspectable in DevTools.</p>
+  <h1>@everystate/css <span class="version-badge">1.0.11</span></h1>
+  <p>State-driven CSS: reactive styling, design tokens, typed validation, and WCAG contrast enforcement — all via path-based state.</p>
 
   <h2 id="install">Install</h2>
   <div class="install-wrap">
-    <pre><code>npm install @everystate/css</code></pre>
-    <button class="copy-btn" onclick="__copy('npm install @everystate/css', this)">Copy</button>
+    <pre><code>npm install @everystate/css @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/css @everystate/core', this)">Copy</button>
   </div>
 
   <h2 id="overview">Overview</h2>
-  <p><code>@everystate/css</code> stores state directly in CSS custom properties (<code>--key: value</code>) on <code>:root</code> and as <code>data-*</code> attributes on elements. This means:</p>
+  <p><code>@everystate/css</code> has two main APIs:</p>
   <ul>
-    <li>CSS selectors can react to state: <code>[data-theme="dark"] { ... }</code></li>
-    <li>State is visible in DevTools (Elements → Computed → CSS variables)</li>
-    <li>No JavaScript needed after initial state is set — CSS handles the visual response</li>
-    <li>Custom properties pierce Shadow DOM boundaries</li>
+    <li><strong>Style Engine</strong> — compiles dot-path CSS state to real <code>CSSStyleSheet</code> rules. Reactive updates, pseudo-classes, nested selectors.</li>
+    <li><strong>Design System</strong> — stores design tokens in the EveryState store. Token changes propagate to styles. Bulk theme swaps.</li>
   </ul>
+  <p>Both use the same <code>get</code>/<code>set</code>/<code>subscribe</code> pattern as the core store. CSS rules are state. Tokens are state. Themes are state transitions.</p>
 
-  <h2 id="createCssState">createCssState(initialState)</h2>
+  <!-- ═══ Style Engine ═══ -->
+  <h2 id="style-engine">Style Engine</h2>
+  <div class="api-sig">createStyleEngine(store) → styleEngine</div>
+  <p>Creates a style engine that compiles dot-path state to real CSS rules via the CSSOM.</p>
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { createStyleEngine } from '@everystate/css';
+
+const store = createEveryState({});
+const engine = createStyleEngine(store);</code></pre>
+
+  <h2 id="dot-path-css">Dot-Path CSS</h2>
+  <p>Write CSS as dot-path state. The style engine compiles it to real stylesheet rules:</p>
+  <pre><code>// Set CSS properties via dot paths
+store.set('css..button.backgroundColor', '#3b82f6');
+store.set('css..button.color', '#ffffff');
+store.set('css..button.padding', '0.5rem 1rem');
+store.set('css..button.borderRadius', '8px');
+
+// Compiles to:
+// .button { background-color: #3b82f6; color: #ffffff; padding: 0.5rem 1rem; border-radius: 8px; }</code></pre>
+
+  <div class="callout callout-info">
+    <strong>Path convention</strong>
+    CSS paths use <code>css..</code> prefix. The double-dot indicates a class selector. Tag selectors use <code>css.</code> with a single dot. ID selectors use <code>css.#</code>.
+  </div>
+
+  <h2 id="pseudo-classes">Pseudo-Classes</h2>
+  <pre><code>// :hover
+store.set('css..button:hover.backgroundColor', '#2563eb');
+store.set('css..button:hover.transform', 'scale(1.02)');
+
+// :focus
+store.set('css..input:focus.outline', '2px solid #3b82f6');
+
+// Compiles to:
+// .button:hover { background-color: #2563eb; transform: scale(1.02); }
+// .input:focus { outline: 2px solid #3b82f6; }</code></pre>
+
+  <h2 id="reactive-updates">Reactive Updates</h2>
+  <p>Because CSS rules are state, changing a value reactively updates the stylesheet — no class toggling, no inline styles:</p>
+  <pre><code>// Initial
+store.set('css..card.backgroundColor', '#1e293b');
+
+// Later — the stylesheet rule updates in place
+store.set('css..card.backgroundColor', '#0f172a');</code></pre>
+
+  <!-- ═══ Design System ═══ -->
+  <h2 id="design-system">Design System</h2>
+  <div class="api-sig">createDesignSystem(store) → designSystem</div>
+  <p>Creates a design system that stores tokens as state and provides reactive bindings to styles.</p>
+  <pre><code>import { createDesignSystem } from '@everystate/css';
+
+const ds = createDesignSystem(store);</code></pre>
+
+  <h2 id="tokens">Design Tokens</h2>
+  <pre><code>ds.setTokens({
+  'color.primary': '#3b82f6',
+  'color.secondary': '#10b981',
+  'color.bg': '#0f172a',
+  'color.text': '#e2e8f0',
+  'spacing.sm': '0.5rem',
+  'spacing.md': '1rem',
+  'spacing.lg': '2rem',
+  'radius.md': '8px',
+});
+
+// Read a token
+ds.getToken('color.primary'); // '#3b82f6'
+
+// Tokens are reactive — change a token, styles update
+store.set('token.color.primary', '#ef4444');</code></pre>
+
+  <h2 id="theme-switching">Theme Switching</h2>
+  <pre><code>const themes = {
+  light: {
+    'color.bg': '#ffffff',
+    'color.text': '#1e293b',
+    'color.primary': '#3b82f6',
+  },
+  dark: {
+    'color.bg': '#0f172a',
+    'color.text': '#e2e8f0',
+    'color.primary': '#60a5fa',
+  }
+};
+
+// Bulk theme swap — all tokens update atomically
+ds.applyTheme(themes.dark);
+
+// Toggle
+function toggleTheme() {
+  const current = store.get('theme.mode') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  ds.applyTheme(themes[next]);
+  store.set('theme.mode', next);
+}</code></pre>
+
+  <!-- ═══ CSS State v1 ═══ -->
+  <h2 id="css-state">CSS State (v1 API)</h2>
   <div class="api-sig">createCssState(initial?: object) → cssStateManager</div>
-  <p>Creates a CSS state manager. Call <code>.init()</code> to inject the managed <code>&lt;style&gt;</code> element and apply initial state.</p>
+  <p>The original CSS state manager. Stores state directly in CSS custom properties (<code>--key: value</code>) on <code>:root</code> and as <code>data-*</code> attributes on elements.</p>
   <pre><code>import { createCssState } from '@everystate/css';
 
 const ui = createCssState({ theme: 'light', count: 0 });
@@ -93,68 +197,26 @@ ui.init();
 // &lt;html&gt; now has data-theme="dark"
 
 const theme = ui.getState('theme'); // 'dark'</code></pre>
-  <p>Values are serialized to CSS-compatible strings automatically. Objects and arrays are JSON-serialized.</p>
 
   <h2 id="observe">observe(key, callback)</h2>
   <div class="api-sig">ui.observe(key: string, callback: (value) → void) → unobserve</div>
-  <p>Watch for state changes. Returns an unobserve function.</p>
   <pre><code>const unobserve = ui.observe('theme', (value) =&gt; {
   console.log('Theme changed to:', value);
 });
 
 ui.setState('theme', 'dark'); // logs "Theme changed to: dark"
-unobserve(); // stop watching</code></pre>
+unobserve();</code></pre>
 
   <h2 id="declarative">Declarative Binding</h2>
-  <p>Bind state to the DOM without JavaScript using <code>data-observe</code> and <code>data-state-action</code> attributes.</p>
   <pre><code>&lt;!-- Auto-updates text content when 'count' changes --&gt;
 &lt;span data-observe="count"&gt;0&lt;/span&gt;
 
 &lt;!-- Sets state on click --&gt;
-&lt;button data-state-action="theme" data-state-value="dark"&gt;Dark Mode&lt;/button&gt;
-&lt;button data-state-action="theme" data-state-value="light"&gt;Light Mode&lt;/button&gt;</code></pre>
+&lt;button data-state-action="theme" data-state-value="dark"&gt;Dark Mode&lt;/button&gt;</code></pre>
 
-  <h2 id="serializer">Serializer</h2>
-  <div class="api-sig">createSerializer(config?: object) → serializer</div>
-  <p>Configurable serialization between JavaScript values and CSS-compatible strings. Three modes:</p>
-  <table>
-    <thead><tr><th>Mode</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td><code>'escape'</code></td><td>Escapes special CSS characters. Best for simple strings.</td></tr>
-      <tr><td><code>'json'</code></td><td>Full JSON serialization. Best for objects/arrays.</td></tr>
-      <tr><td><code>'hybrid'</code></td><td>Strings are escaped, objects are JSON. Default mode.</td></tr>
-    </tbody>
-  </table>
-  <pre><code>import { createSerializer } from '@everystate/css';
-
-const ser = createSerializer({ mode: 'hybrid' });
-ser.serialize('hello world');     // 'hello\\ world'
-ser.serialize({ a: 1 });          // '{"a":1}'
-ser.deserialize('hello\\ world'); // 'hello world'</code></pre>
-
-  <h2 id="templateManager">Template Manager</h2>
-  <div class="api-sig">createTemplateManager(stateManager?) → templateManager</div>
-  <p>Component mounting via <code>&lt;template&gt;</code> elements, event delegation via <code>data-action</code> attributes, and CSS-variable-based templating.</p>
-  <pre><code>import { createCssState, createTemplateManager } from '@everystate/css';
-
-const ui = createCssState({ user: 'Alice' });
-ui.init();
-
-const tm = createTemplateManager(ui);
-
-// Register an action handler
-tm.registerAction('greet', (e) =&gt; {
-  alert(`Hello, ${ui.getState('user')}!`);
-});
-
-// Attach event delegation to a container
-tm.attachDelegation(document.getElementById('app'));</code></pre>
-  <pre><code>&lt;div id="app"&gt;
-  &lt;button data-action="greet"&gt;Say Hello&lt;/button&gt;
-&lt;/div&gt;</code></pre>
-
-  <h2 id="wordpress">WordPress</h2>
-  <p>Drop a <code>&lt;script&gt;</code> tag into your theme. No build step, no React, no webpack. State lives in CSS custom properties that your existing stylesheets can reference.</p>
+  <!-- ═══ Use Cases ═══ -->
+  <h2 id="wordpress">WordPress / Static Sites</h2>
+  <p>Drop a <code>&lt;script&gt;</code> tag into your theme. No build step, no React, no webpack:</p>
   <pre><code>&lt;script type="module"&gt;
   import { createCssState } from 'https://esm.sh/@everystate/css';
   const ui = createCssState({ sidebar: 'open', theme: 'light' });
@@ -166,17 +228,16 @@ tm.attachDelegation(document.getElementById('app'));</code></pre>
   [data-theme="dark"] { --bg: #1a1a2e; --text: #eee; }
 &lt;/style&gt;</code></pre>
 
-  <h2 id="static-sites">Static Sites (Jekyll, Hugo, 11ty)</h2>
-  <p>Add interactivity to server-rendered HTML. The server provides structure, <code>@everystate/css</code> adds reactive state without a SPA framework.</p>
-
   <h2 id="web-components">Web Components</h2>
-  <p>CSS custom properties defined on <code>:root</code> cascade into Shadow DOM. This makes <code>@everystate/css</code> a natural theming bridge for web component architectures.</p>
-  <pre><code>// Inside a web component
-connectedCallback() {
-  // Read the global theme token
+  <p>CSS custom properties defined on <code>:root</code> cascade into Shadow DOM, making <code>@everystate/css</code> a natural theming bridge:</p>
+  <pre><code>connectedCallback() {
   const theme = getComputedStyle(this).getPropertyValue('--theme').trim();
   this.shadowRoot.innerHTML = `&lt;p&gt;Current theme: ${theme}&lt;/p&gt;`;
 }</code></pre>
+
+  <footer class="site-footer">
+    <p>MIT © Ajdin Imsirovic · <a href="https://www.npmjs.com/package/@everystate/css">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-css">GitHub</a></p>
+  </footer>
 
 </main>
 
