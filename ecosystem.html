@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ecosystem - EveryState</title>
+  <title>Ecosystem — EveryState</title>
   <meta name="description" content="Complete ecosystem reference for EveryState: router, renderer, view, perf, test, aliases, types, and examples.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -11,11 +11,12 @@
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState.js</a>
+  <a href="/" class="logo">EveryState</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
     <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html" class="active">Ecosystem</a>
@@ -35,6 +36,7 @@
   </ul>
   <h3>Framework Adapters</h3>
   <ul>
+    <li><a href="angular.html">@everystate/angular</a></li>
     <li><a href="react.html">@everystate/react</a></li>
     <li><a href="vue.html">@everystate/vue</a></li>
   </ul>
@@ -66,6 +68,7 @@
       <tr><td><a href="core.html">@everystate/core</a></td><td>Path-based state management with wildcard subscriptions and async support</td><td>MIT</td></tr>
       <tr><td><a href="css.html">@everystate/css</a></td><td>Reactive CSSOM engine: design tokens, typed validation, WCAG enforcement</td><td>MIT</td></tr>
       <tr><td><a href="#view">@everystate/view</a></td><td>State-driven view: DOMless resolve + surgical DOM projector</td><td>MIT</td></tr>
+      <tr><td><a href="angular.html">@everystate/angular</a></td><td>Angular 17+ signals adapter</td><td>MIT</td></tr>
       <tr><td><a href="react.html">@everystate/react</a></td><td>React 18 hooks adapter</td><td>MIT</td></tr>
       <tr><td><a href="vue.html">@everystate/vue</a></td><td>Vue 3 composables adapter</td><td>MIT</td></tr>
       <tr><td><a href="#renderer">@everystate/renderer</a></td><td>Direct-binding reactive renderer. Zero build step</td><td>MIT</td></tr>
@@ -91,8 +94,8 @@
 
   <h3>How it works</h3>
   <ol>
-    <li><strong>Resolve</strong> - a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
-    <li><strong>Project</strong> - diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
+    <li><strong>Resolve</strong> — a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
+    <li><strong>Project</strong> — diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
   </ol>
 
   <pre><code>import { createEveryState } from '@everystate/core';
@@ -120,7 +123,7 @@ const app = createApp(store, document.getElementById('app'));</code></pre>
   <!-- RENDERER -->
   <!-- ═══════════════════════════════════════════════ -->
   <h2 id="renderer">@everystate/renderer <span class="version-badge">1.0.3</span></h2>
-  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes - the renderer connects them to your store. Zero build step.</p>
+  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes — the renderer connects them to your store. Zero build step.</p>
 
   <div class="install-wrap">
     <pre><code>npm install @everystate/renderer @everystate/core</code></pre>
@@ -313,7 +316,7 @@ type Paths = DotPaths&lt;AppState&gt;;
   <!-- EXAMPLES -->
   <!-- ═══════════════════════════════════════════════ -->
   <h2 id="examples">@everystate/examples <span class="version-badge">1.0.0</span></h2>
-  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file - no build step needed.</p>
+  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file — no build step needed.</p>
 
   <div class="install-wrap">
     <pre><code>npm install @everystate/examples</code></pre>

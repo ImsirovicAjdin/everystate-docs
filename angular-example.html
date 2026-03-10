@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EveryState + Angular 19 - Complete Example</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .main.landing { max-width: 1060px; }
+    .example-intro { text-align: center; padding: 2rem 0 1rem; }
+    .example-intro h1 { font-size: 2rem; }
+    .example-intro p { color: var(--text-muted); max-width: 640px; margin: 0 auto 0.5rem; }
+    .file-block { margin-bottom: 1.5rem; }
+    .file-block-header { display: flex; align-items: center; gap: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 16px; font-size: 13px; font-weight: 600; font-family: monospace; color: var(--text-muted); }
+    .file-block-header .file-icon { color: var(--accent); }
+    .file-block-header .file-badge { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 1rem; background: var(--accent-subtle); color: var(--accent); }
+    .file-block pre { margin: 0; border-radius: 0 0 8px 8px; border: 1px solid var(--border); border-top: none; }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="logo">EveryState</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://www.npmjs.com/package/@everystate/angular">npm</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">&#9790;</button>
+  </div>
+</header>
+<main class="main landing">
+  <div class="example-intro">
+    <h1>EveryState + Angular 19</h1>
+    <p>A complete task manager. Every file shown below.</p>
+    <p style="font-size:0.85rem;">Install: <code>npm i @everystate/core @everystate/angular</code></p>
+  </div>
+
+  <div class="features" style="margin-bottom:2rem;">
+    <div class="feature-card blue"><h3>6 files, ~160 lines</h3><p>Store service, 4 components, bootstrap.</p></div>
+    <div class="feature-card green"><h3>Zero logic in components</h3><p>Read with <code>usePath</code>, publish with <code>useIntent</code>.</p></div>
+    <div class="feature-card purple"><h3>No @Input/@Output</h3><p>Clean templates via store.</p></div>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> store.service.ts <span class="file-badge">Store + Logic</span></div>
+    <pre><code>import { Injectable } from '@angular/core';
+import { createEveryState } from '@everystate/core';
+
+export interface Task { id: string; text: string; completed: boolean; important: boolean; }
+
+@Injectable({ providedIn: 'root' })
+export class StoreService {
+  private store: any;
+  constructor() {
+    this.store = createEveryState({
+      state: { tasks: [], taskCount: 0, filter: 'all' },
+      derived: { tasks: { filtered: [] } }
+    });
+
+    // Intent handlers - business logic lives here, not in components
+    this.store.subscribe('intent.addTask', (text: string) =&gt; {
+      const t = String(text || '').trim();
+      if (!t) return;
+      const tasks: Task[] = this.store.get('state.tasks') || [];
+      const next = [...tasks, { id: Date.now().toString(36), text: t, completed: false, important: /!/i.test(t) }];
+      this.store.set('state.tasks', next);
+      this.store.set('state.taskCount', next.length);
+    });
+
+    this.store.subscribe('intent.toggleTask', (id: string) =&gt; {
+      const tasks: Task[] = this.store.get('state.tasks') || [];
+      this.store.set('state.tasks', tasks.map(x =&gt; x.id === id ? { ...x, completed: !x.completed } : x));
+    });
+
+    this.store.subscribe('intent.deleteTask', (id: string) =&gt; {
+      const tasks: Task[] = this.store.get('state.tasks') || [];
+      const next = tasks.filter(x =&gt; x.id !== id);
+      this.store.set('state.tasks', next);
+      this.store.set('state.taskCount', next.length);
+    });
+
+    this.store.subscribe('intent.changeFilter', (f: string) =&gt; this.store.set('state.filter', f));
+
+    // Derived state
+    const recompute = () =&gt; {
+      const tasks: Task[] = this.store.get('state.tasks') || [];
+      const f = this.store.get('state.filter');
+      this.store.set('derived.tasks.filtered',
+        f === 'active' ? tasks.filter(t =&gt; !t.completed)
+        : f === 'completed' ? tasks.filter(t =&gt; t.completed)
+        : f === 'important' ? tasks.filter(t =&gt; t.important) : tasks);
+    };
+    this.store.subscribe('state.tasks', recompute);
+    this.store.subscribe('state.filter', recompute);
+    recompute();
+  }
+
+  get = (p: string) =&gt; this.store.get(p);
+  set = (p: string, v: any) =&gt; this.store.set(p, v);
+  subscribe = (p: string, h: Function) =&gt; this.store.subscribe(p, h);
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> header.component.ts <span class="file-badge">Read-only</span></div>
+    <pre><code>import { Component, Signal } from '@angular/core';
+import { usePath } from '@everystate/angular';
+import { StoreService } from '../store.service';
+
+@Component({
+  selector: 'app-header', standalone: true,
+  template: `&lt;header&gt;
+    &lt;div class="title"&gt;Angular + EveryState&lt;/div&gt;
+    &lt;div class="badge"&gt;{{ count() }} task{{ count() !== 1 ? 's' : '' }}&lt;/div&gt;
+  &lt;/header&gt;`
+})
+export class HeaderComponent {
+  count: Signal&lt;number&gt;;
+  constructor(private store: StoreService) {
+    this.count = usePath&lt;number&gt;(store, 'state.taskCount');
+  }
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> task-input.component.ts <span class="file-badge">Local + intent</span></div>
+    <pre><code>import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { useIntent } from '@everystate/angular';
+import { StoreService } from '../store.service';
+
+@Component({
+  selector: 'app-task-input', standalone: true, imports: [FormsModule],
+  template: `&lt;div class="card"&gt;&lt;div class="input-row"&gt;
+    &lt;input [(ngModel)]="text" placeholder="What needs to be done?" (keydown.enter)="addTask()" /&gt;
+    &lt;button class="primary" (click)="addTask()"&gt;Add&lt;/button&gt;
+  &lt;/div&gt;&lt;/div&gt;`
+})
+export class TaskInputComponent {
+  text = '';
+  private add: (text: string) =&gt; void;
+  constructor(private store: StoreService) { this.add = useIntent(store, 'intent.addTask'); }
+  addTask(): void { this.add(this.text); this.text = ''; }
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> filters.component.ts <span class="file-badge">Read + publish</span></div>
+    <pre><code>import { Component, Signal } from '@angular/core';
+import { usePath, useIntent } from '@everystate/angular';
+import { StoreService } from '../store.service';
+
+@Component({
+  selector: 'app-filters', standalone: true,
+  template: `&lt;div class="card filters"&gt;
+    &lt;button [class.active]="filter() === 'all'" (click)="setFilter('all')"&gt;All&lt;/button&gt;
+    &lt;button [class.active]="filter() === 'active'" (click)="setFilter('active')"&gt;Active&lt;/button&gt;
+    &lt;button [class.active]="filter() === 'completed'" (click)="setFilter('completed')"&gt;Done&lt;/button&gt;
+    &lt;button [class.active]="filter() === 'important'" (click)="setFilter('important')"&gt;Important&lt;/button&gt;
+  &lt;/div&gt;`
+})
+export class FiltersComponent {
+  filter: Signal&lt;string&gt;;
+  setFilter: (f: string) =&gt; void;
+  constructor(private store: StoreService) {
+    this.filter = usePath&lt;string&gt;(store, 'state.filter');
+    this.setFilter = useIntent(store, 'intent.changeFilter');
+  }
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> task-list.component.ts <span class="file-badge">Derived + intents</span></div>
+    <pre><code>import { Component, Signal } from '@angular/core';
+import { usePath, useIntent } from '@everystate/angular';
+import { StoreService, Task } from '../store.service';
+
+@Component({
+  selector: 'app-task-list', standalone: true,
+  template: `&lt;div class="card"&gt;&lt;ul&gt;
+    @for (task of items(); track task.id) {
+      &lt;li&gt;
+        &lt;input type="checkbox" [checked]="task.completed" (change)="toggle(task.id)" /&gt;
+        &lt;span&gt;{{ task.text }}&lt;/span&gt;
+        &lt;div class="right"&gt;
+          @if (task.important) { &lt;span class="pill"&gt;Important&lt;/span&gt; }
+          &lt;button (click)="del(task.id)"&gt;Delete&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/li&gt;
+    }
+  &lt;/ul&gt;&lt;/div&gt;`
+})
+export class TaskListComponent {
+  items: Signal&lt;Task[]&gt;;
+  toggle: (id: string) =&gt; void;
+  del: (id: string) =&gt; void;
+  constructor(private store: StoreService) {
+    this.items = usePath&lt;Task[]&gt;(store, 'derived.tasks.filtered');
+    this.toggle = useIntent(store, 'intent.toggleTask');
+    this.del = useIntent(store, 'intent.deleteTask');
+  }
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> app.component.ts <span class="file-badge">Composition</span></div>
+    <pre><code>import { Component } from '@angular/core';
+import { HeaderComponent } from './header/header.component';
+import { FiltersComponent } from './filters/filters.component';
+import { TaskInputComponent } from './task-input/task-input.component';
+import { TaskListComponent } from './task-list/task-list.component';
+
+@Component({
+  selector: 'app-root', standalone: true,
+  imports: [HeaderComponent, FiltersComponent, TaskInputComponent, TaskListComponent],
+  template: `&lt;div class="app"&gt;
+    &lt;app-header /&gt;
+    &lt;div class="container"&gt;
+      &lt;app-filters /&gt;
+      &lt;app-task-input /&gt;
+      &lt;app-task-list /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;`
+})
+export class AppComponent {}</code></pre>
+  </div>
+
+  <h2 style="border:none; text-align:center; margin-top:2rem;">The Adapter Source</h2>
+  <p style="text-align:center; color:var(--text-muted); margin-bottom:1rem;">This is the entire <code>@everystate/angular</code> package. ~30 lines.</p>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JS</span> @everystate/angular/index.js <span class="file-badge">~30 lines</span></div>
+    <pre><code>import { signal } from '@angular/core';
+
+export function usePath(store, path) {
+  const sig = signal(store.get(path));
+  store.subscribe(path, (val) =&gt; sig.set(val));
+  return sig.asReadonly();
+}
+
+export function useIntent(store, path) {
+  return (value) =&gt; store.set(path, value);
+}
+
+export function useWildcard(store, wildcardPath) {
+  const parentPath = wildcardPath.endsWith('.*') ? wildcardPath.slice(0, -2) : wildcardPath;
+  const sig = signal(store.get(parentPath));
+  store.subscribe(wildcardPath, () =&gt; sig.set(store.get(parentPath)));
+  return sig.asReadonly();
+}
+
+export function useAsync(store, path) {
+  return {
+    data: usePath(store, path + '.data'),
+    status: usePath(store, path + '.status'),
+    error: usePath(store, path + '.error'),
+    execute: (fetcher) =&gt; store.setAsync(path, fetcher),
+    cancel: () =&gt; store.cancel(path),
+  };
+}</code></pre>
+  </div>
+
+  <h2 style="border:none; text-align:center;">Testing Without Angular</h2>
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">TS</span> store.spec.ts <span class="file-badge">No TestBed</span></div>
+    <pre><code>import { StoreService } from './store.service';
+
+test('adding a task increments taskCount', () =&gt; {
+  const svc = new StoreService();
+  svc.set('intent.addTask', 'Buy groceries');
+  expect(svc.get('state.taskCount')).toBe(1);
+  expect(svc.get('state.tasks')[0].text).toBe('Buy groceries');
+});
+
+test('filter shows only active tasks', () =&gt; {
+  const svc = new StoreService();
+  svc.set('intent.addTask', 'task 1');
+  svc.set('intent.addTask', 'task 2');
+  svc.set('intent.toggleTask', svc.get('state.tasks')[0].id);
+  svc.set('intent.changeFilter', 'active');
+  expect(svc.get('derived.tasks.filtered')).toHaveLength(1);
+});</code></pre>
+  </div>
+
+  <footer class="site-footer">
+    <p>MIT &copy; Ajdin Imsirovic &middot; <a href="https://www.npmjs.com/package/@everystate/angular">npm</a> &middot; <a href="https://github.com/ImsirovicAjdin/everystate-angular">GitHub</a></p>
+  </footer>
+</main>
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+  });
+}
+</script>
+</body>
+</html>

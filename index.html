@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EveryState - Path-based state management for every framework</title>
-  <meta name="description" content="Observable state management with dot-path addressing, wildcard subscriptions, async support, and state-driven CSS. Zero dependencies. Works with React, Vue, or vanilla JS.">
+  <title>EveryState — Path-based state management for every framework</title>
+  <meta name="description" content="Observable state management with dot-path addressing, wildcard subscriptions, async support, and state-driven CSS. Zero dependencies. Works with React, Vue, Angular, or vanilla JS.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
 </head>
 <body>
 
 <header class="site-header">
-  <a href="/" class="logo">EveryState.js</a>
+  <a href="/" class="logo">EveryState</a>
   <nav>
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
     <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html">Ecosystem</a>
@@ -32,9 +33,9 @@
 
   <!-- ═══ Hero ═══ -->
   <div class="hero">
-    <h1>EveryState.js</h1>
-    <p class="tagline">Observable state management with dot-path addressing.<br>Works with React, Vue, or no framework at all.</p>
-    <p class="sub">get · set · subscribe - that's the whole API. ~6 KB, zero dependencies.</p>
+    <h1>EveryState</h1>
+    <p class="tagline">Observable state management with dot-path addressing.<br>Works with React, Vue, Angular, or no framework at all.</p>
+    <p class="sub">get · set · subscribe — that's the whole API. ~6 KB, zero dependencies.</p>
 
     <div class="cta-row">
       <a href="tutorial.html" class="btn btn-primary">Get Started →</a>
@@ -67,7 +68,7 @@
   </div>
 
   <!-- ═══ Why EveryState ═══ -->
-  <h2 style="border:none; text-align:center; margin-top:3.5rem;">Why EveryState.js?</h2>
+  <h2 style="border:none; text-align:center; margin-top:3.5rem;">Why EveryState?</h2>
 
   <div class="why-grid">
     <div class="why-item">
@@ -80,7 +81,7 @@
     </div>
     <div class="why-item">
       <h4>Framework-Agnostic</h4>
-      <p>Works with React, Vue, vanilla JS, or server-side Node. The same store, same logic, any view layer.</p>
+      <p>Works with React, Vue, Angular, vanilla JS, or server-side Node. The same store, same logic, any view layer.</p>
     </div>
     <div class="why-item">
       <h4>Async Built-In</h4>
@@ -106,6 +107,10 @@
       <p>Reactive store with path-based get/set/subscribe, wildcard listeners, async operations, batch updates, and query client.</p>
     </div>
     <div class="feature-card green">
+      <h3>@everystate/angular</h3>
+      <p>Angular 17+ adapter. <code>usePath</code>, <code>useIntent</code>, <code>useWildcard</code>, <code>useAsync</code> bridged to Angular signals.</p>
+    </div>
+    <div class="feature-card green">
       <h3>@everystate/react</h3>
       <p>React 18 adapter. <code>usePath</code>, <code>useIntent</code>, <code>useWildcard</code>, <code>useAsync</code> hooks + <code>EventStateProvider</code>.</p>
     </div>
@@ -115,7 +120,7 @@
     </div>
     <div class="feature-card purple">
       <h3>@everystate/css</h3>
-      <p>State-driven CSSOM engine. Reactive design tokens, typed validation, WCAG contrast enforcement - all via dot paths.</p>
+      <p>State-driven CSSOM engine. Reactive design tokens, typed validation, WCAG contrast enforcement — all via dot paths.</p>
     </div>
     <div class="feature-card purple">
       <h3>@everystate/view</h3>
@@ -150,6 +155,11 @@
         <td><a href="css.html">@everystate/css</a></td>
         <td>Reactive CSSOM engine: design tokens, typed validation, WCAG enforcement</td>
         <td><span class="badge badge-core">core</span></td>
+      </tr>
+      <tr>
+        <td><a href="angular.html">@everystate/angular</a></td>
+        <td>Angular 17+ signals adapter: <code>usePath</code>, <code>useIntent</code>, <code>useAsync</code></td>
+        <td><span class="badge badge-adapter">adapter</span></td>
       </tr>
       <tr>
         <td><a href="react.html">@everystate/react</a></td>
@@ -211,14 +221,14 @@
       <tr><th>Feature</th><th>EveryState</th><th>Redux</th><th>Zustand</th><th>Pinia</th></tr>
     </thead>
     <tbody>
-      <tr><td>Framework-agnostic</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
-      <tr><td>Dot-path addressing</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
-      <tr><td>Wildcard subscriptions</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
-      <tr><td>Built-in async lifecycle</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
-      <tr><td>State-driven CSS</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
-      <tr><td>Zero dependencies</td><td class="check">✓</td><td class="cross">-</td><td class="check">✓</td><td class="cross">-</td></tr>
-      <tr><td>No build step needed</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
-      <tr><td>Test without framework</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="cross">-</td></tr>
+      <tr><td>Framework-agnostic</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>Dot-path addressing</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>Wildcard subscriptions</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>Built-in async lifecycle</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>State-driven CSS</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>Zero dependencies</td><td class="check">✓</td><td class="cross">—</td><td class="check">✓</td><td class="cross">—</td></tr>
+      <tr><td>No build step needed</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>Test without framework</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td></tr>
     </tbody>
   </table>
 

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@everystate/angular — API Reference</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="angular.html" class="active">Angular</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://www.npmjs.com/package/@everystate/angular">npm</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">&#9790;</button>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <h3>Getting Started</h3>
+  <ul>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#quick-start">Quick Start</a></li>
+  </ul>
+  <h3>API</h3>
+  <ul>
+    <li><a href="#usePath">usePath</a></li>
+    <li><a href="#useIntent">useIntent</a></li>
+    <li><a href="#useWildcard">useWildcard</a></li>
+    <li><a href="#useAsync">useAsync</a></li>
+  </ul>
+  <h3>Patterns</h3>
+  <ul>
+    <li><a href="#store-service">StoreService</a></li>
+    <li><a href="#namespaces">Three Namespaces</a></li>
+    <li><a href="#vs-ngrx">vs NgRx</a></li>
+    <li><a href="#testing">Testing</a></li>
+  </ul>
+</aside>
+
+<main class="main">
+  <h1>@everystate/angular <span class="version-badge">1.0.0</span></h1>
+  <p>Angular adapter for <a href="core.html">@everystate/core</a>. Four functions - the entire API. ~30 lines.</p>
+  <p>See a complete task manager: <a href="angular-example.html">Angular Example</a></p>
+
+  <h2 id="install">Install</h2>
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/angular @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/angular @everystate/core', this)">Copy</button>
+  </div>
+  <p>Peers: <code>@angular/core &gt;=17.0.0</code>, <code>@everystate/core &gt;=1.0.5</code>.</p>
+
+  <h2 id="quick-start">Quick Start</h2>
+  <pre><code>// store.service.ts
+@Injectable({ providedIn: 'root' })
+export class StoreService {
+  private store = createEveryState({ state: { count: 0 } });
+  get = this.store.get.bind(this.store);
+  set = this.store.set.bind(this.store);
+  subscribe = this.store.subscribe.bind(this.store);
+  constructor() {
+    this.store.subscribe('intent.increment', () =&gt; {
+      this.store.set('state.count', this.store.get('state.count') + 1);
+    });
+  }
+}
+
+// counter.component.ts
+@Component({
+  selector: 'app-counter', standalone: true,
+  template: `&lt;button (click)="inc(true)"&gt;{{ count() }}&lt;/button&gt;`
+})
+export class CounterComponent {
+  count = usePath&lt;number&gt;(this.store, 'state.count');
+  inc = useIntent(this.store, 'intent.increment');
+  constructor(private store: StoreService) {}
+}</code></pre>
+
+  <h2 id="usePath">usePath(store, path)</h2>
+  <div class="api-sig">usePath&lt;T&gt;(store, path) &rarr; Signal&lt;T&gt;</div>
+  <p>Read-only Angular signal. Updates when store value changes. No Zone.js overhead.</p>
+  <pre><code>this.count = usePath&lt;number&gt;(store, 'state.taskCount');
+this.items = usePath&lt;Task[]&gt;(store, 'derived.tasks.filtered');</code></pre>
+
+  <h2 id="useIntent">useIntent(store, path)</h2>
+  <div class="api-sig">useIntent(store, path) &rarr; (value) &rarr; any</div>
+  <p>Stable setter function. Publishes intent to the store.</p>
+  <pre><code>this.add = useIntent(store, 'intent.addTask');
+this.toggle = useIntent(store, 'intent.toggleTask');</code></pre>
+
+  <h2 id="useWildcard">useWildcard(store, path)</h2>
+  <div class="api-sig">useWildcard&lt;T&gt;(store, wildcardPath) &rarr; Signal&lt;T&gt;</div>
+  <p>Re-renders when any child of the path changes.</p>
+  <pre><code>this.user = useWildcard(store, 'state.user.*');</code></pre>
+
+  <h2 id="useAsync">useAsync(store, path)</h2>
+  <div class="api-sig">useAsync(store, path) &rarr; { data, status, error, execute, cancel }</div>
+  <p>Async lifecycle with auto-abort.</p>
+  <pre><code>const { data, status, execute } = useAsync(store, 'users');
+execute((signal) =&gt; fetch('/api/users', { signal }).then(r =&gt; r.json()));</code></pre>
+
+  <h2 id="store-service">StoreService Pattern</h2>
+  <p>The adapter provides functions, not a service. You create the service with Angular DI. Business logic lives in subscribers:</p>
+  <pre><code>this.store.subscribe('intent.addTask', (text) =&gt; {
+  const tasks = this.store.get('state.tasks') || [];
+  const next = [...tasks, { id: genId(), text, completed: false }];
+  this.store.set('state.tasks', next);
+});</code></pre>
+
+  <h2 id="namespaces">Three Namespaces</h2>
+  <table>
+    <thead><tr><th>Namespace</th><th>Purpose</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td><code>state.*</code></td><td>Application state</td><td><code>usePath</code></td></tr>
+      <tr><td><code>derived.*</code></td><td>Computed projections</td><td><code>usePath</code></td></tr>
+      <tr><td><code>intent.*</code></td><td>UI signals</td><td><code>useIntent</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="vs-ngrx">vs NgRx</h2>
+  <table>
+    <thead><tr><th>Concern</th><th>NgRx</th><th>EveryState</th></tr></thead>
+    <tbody>
+      <tr><td>Dispatch</td><td>Actions (file)</td><td><code>useIntent</code></td></tr>
+      <tr><td>Update</td><td>Reducers (file)</td><td>Subscribers</td></tr>
+      <tr><td>Side effects</td><td>Effects + RxJS</td><td>Subscribers</td></tr>
+      <tr><td>Read</td><td>Selectors (file)</td><td><code>usePath</code></td></tr>
+      <tr><td>Async</td><td>Effects + actions</td><td><code>useAsync</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="testing">Testing Without Angular</h2>
+  <pre><code>test('add task increments count', () =&gt; {
+  const svc = new StoreService();
+  svc.set('intent.addTask', 'test');
+  expect(svc.get('state.taskCount')).toBe(1);
+});</code></pre>
+  <p>No TestBed. No fakeAsync. Just state in, state out.</p>
+
+  <footer class="site-footer">
+    <p>MIT &copy; Ajdin Imsirovic &middot; <a href="https://www.npmjs.com/package/@everystate/angular">npm</a> &middot; <a href="https://github.com/ImsirovicAjdin/everystate-angular">GitHub</a></p>
+  </footer>
+</main>
+
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+</body>
+</html>
