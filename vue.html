@@ -16,7 +16,9 @@
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
     <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
     <a href="vue.html" class="active">Vue</a>
     <a href="ecosystem.html">Ecosystem</a>
   </nav>
@@ -108,7 +110,7 @@ const setCount = useIntent('count');
   </ol>
   <p>When <code>store.set(path, value)</code> is called, EveryState fires the subscription. We update the <code>ref</code>. Vue's reactivity system detects the change and re-renders. This is Vue's built-in reactivity combined with EveryState's explicit subscriptions.</p>
 
-  <!-- ═══ API ═══ -->
+  <!--  API  -->
 
   <h2 id="provideStore">provideStore(store)</h2>
   <div class="api-sig">provideStore(store: EveryStateStore) → void</div>
@@ -198,7 +200,7 @@ onMounted(() =&gt; {
   &lt;/ul&gt;
 &lt;/template&gt;</code></pre>
 
-  <!-- ═══ Component Patterns ═══ -->
+  <!--  Component Patterns  -->
   <h2 id="components">Component Patterns</h2>
 
   <h3>Read-Only Component</h3>
@@ -245,7 +247,7 @@ const del = useIntent('intent.deleteTask');
   &lt;div v-else&gt;No tasks yet.&lt;/div&gt;
 &lt;/template&gt;</code></pre>
 
-  <!-- ═══ vs Pinia ═══ -->
+  <!--  vs Pinia  -->
   <h2 id="vs-pinia">Comparison to Pinia</h2>
 
   <table class="compare-table">
@@ -263,7 +265,7 @@ const del = useIntent('intent.deleteTask');
   <p><strong>Use Pinia when:</strong> you're building a Vue-only app, you want automatic reactivity tracking, you want Vue DevTools integration.</p>
   <p><strong>Use EveryState when:</strong> you need framework independence, you want explicit testable boundaries, you're sharing state across multiple rendering layers, or you prefer intent-driven architecture.</p>
 
-  <!-- ═══ Testing ═══ -->
+  <!--  Testing  -->
   <h2 id="testing">Testing Without Vue</h2>
   <p>Because business logic lives in subscribers, you can test without Vue:</p>
   <pre><code>import { store } from './store.js';

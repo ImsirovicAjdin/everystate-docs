@@ -16,7 +16,9 @@
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html" class="active">Core</a>
     <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html">Ecosystem</a>
   </nav>
@@ -89,14 +91,14 @@ store.get('count');           // 1
 // Cleanup
 unsub();</code></pre>
 
-  <!-- ═══ createEveryState ═══ -->
+  <!--  createEveryState  -->
   <h2 id="createEveryState">createEveryState(initialState)</h2>
   <div class="api-sig">createEveryState(initial?: object) → store</div>
   <p>Creates a new reactive store. The initial state is deep-cloned.</p>
   <pre><code>const store = createEveryState({ count: 0 });
 const empty = createEveryState(); // empty store, add paths later</code></pre>
 
-  <!-- ═══ get ═══ -->
+  <!--  get  -->
   <h2 id="get">store.get(path?)</h2>
   <div class="api-sig">store.get(path?: string) → any</div>
   <p>Retrieve a value by dot-separated path. Returns the entire state if no path is provided. Returns <code>undefined</code> for non-existent paths.</p>
@@ -105,7 +107,7 @@ store.get('user');          // { name: 'Alice' }
 store.get();                // entire state object
 store.get('no.such.path');  // undefined</code></pre>
 
-  <!-- ═══ set ═══ -->
+  <!--  set  -->
   <h2 id="set">store.set(path, value)</h2>
   <div class="api-sig">store.set(path: string, value: any) → value</div>
   <p>Set a value at a path and notify all matching subscribers. Creates intermediate objects if they don't exist. Returns the value that was set.</p>
@@ -113,7 +115,7 @@ store.get('no.such.path');  // undefined</code></pre>
 store.set('user.email', 'alice@example.com'); // creates 'email' key on user
 store.set('deep.nested.path', true);          // creates deep, deep.nested</code></pre>
 
-  <!-- ═══ subscribe ═══ -->
+  <!--  subscribe  -->
   <h2 id="subscribe">store.subscribe(path, handler)</h2>
   <div class="api-sig">store.subscribe(path: string, handler: Function) → unsubscribe</div>
   <p>Subscribe to changes at a path. Returns a function that removes the subscription.</p>
@@ -140,7 +142,7 @@ store.set('count', 1);           // does NOT fire</code></pre>
 });
 // Fires on every set() call - useful for logging/telemetry</code></pre>
 
-  <!-- ═══ setMany ═══ -->
+  <!--  setMany  -->
   <h2 id="setMany">store.setMany(entries)</h2>
   <div class="api-sig">store.setMany(entries: object) → void</div>
   <p>Set multiple paths atomically. Equivalent to calling <code>set()</code> for each entry inside a <code>batch()</code>.</p>
@@ -150,7 +152,7 @@ store.set('count', 1);           // does NOT fire</code></pre>
   'ui.route.params': {},
 });</code></pre>
 
-  <!-- ═══ batch ═══ -->
+  <!--  batch  -->
   <h2 id="batch">store.batch(fn)</h2>
   <div class="api-sig">store.batch(fn: () → void) → void</div>
   <p>Group multiple <code>set()</code> calls. Subscribers are deferred until the batch completes. Each subscriber fires at most once per batch.</p>
@@ -160,7 +162,7 @@ store.set('count', 1);           // does NOT fire</code></pre>
 });
 // subscribers fire once after both updates</code></pre>
 
-  <!-- ═══ setAsync ═══ -->
+  <!--  setAsync  -->
   <h2 id="setAsync">store.setAsync(path, fetcher)</h2>
   <div class="api-sig">store.setAsync(path: string, fetcher: (signal: AbortSignal) → Promise) → Promise</div>
   <p>Run an async operation with automatic status tracking. Manages three sub-paths:</p>
@@ -181,19 +183,19 @@ store.get('users.status'); // 'success'
 store.get('users.data');   // [...]</code></pre>
   <p>If <code>setAsync</code> is called again on the same path while a previous call is still in-flight, the previous call is automatically aborted.</p>
 
-  <!-- ═══ cancel ═══ -->
+  <!--  cancel  -->
   <h2 id="cancel">store.cancel(path)</h2>
   <div class="api-sig">store.cancel(path: string) → void</div>
   <p>Abort an in-flight <code>setAsync</code> operation. Sets status to <code>'cancelled'</code>.</p>
   <pre><code>store.setAsync('users', fetcher); // starts loading
 store.cancel('users');            // aborts, status → 'cancelled'</code></pre>
 
-  <!-- ═══ destroy ═══ -->
+  <!--  destroy  -->
   <h2 id="destroy">store.destroy()</h2>
   <div class="api-sig">store.destroy() → void</div>
   <p>Tear down the store. Aborts all in-flight async operations, clears all subscriptions. Any further calls throw.</p>
 
-  <!-- ═══ Query Client ═══ -->
+  <!--  Query Client  -->
   <h2 id="query-client">Query Client</h2>
   <p>A convenience wrapper around <code>setAsync</code> for data-fetching patterns. Uses the <code>query.${key}</code> namespace internally.</p>
   <pre><code>import { createEveryState } from '@everystate/core';
@@ -222,7 +224,7 @@ qc.getError('users');   // null or error message</code></pre>
   <pre><code>qc.cancel('users');     // abort in-flight request
 qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
 
-  <!-- ═══ Wildcards ═══ -->
+  <!--  Wildcards  -->
   <h2 id="wildcards">Wildcard Patterns</h2>
   <p>When <code>store.set('user.profile.name', 'Bob')</code> is called, these subscribers fire:</p>
   <table>
@@ -238,7 +240,7 @@ qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
   </table>
   <p>Wildcards match on <strong>parent paths</strong>, not the exact path being set. This mirrors DOM event bubbling.</p>
 
-  <!-- ═══ Notification Order ═══ -->
+  <!--  Notification Order  -->
   <h2 id="notification-order">Notification Order</h2>
   <p>When you call <code>store.set('user.name', 'Bob')</code>, subscribers fire in this order:</p>
   <ol>
@@ -247,7 +249,7 @@ qc.invalidate('users'); // reset data, status, error to null/idle</code></pre>
     <li><strong>Grandparent wildcard</strong> - subscribers on <code>'*'</code></li>
   </ol>
 
-  <!-- ═══ Async Patterns ═══ -->
+  <!--  Async Patterns  -->
   <h2 id="async-patterns">Async Patterns</h2>
 
   <h3>Loading indicator</h3>

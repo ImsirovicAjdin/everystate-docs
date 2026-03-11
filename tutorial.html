@@ -16,7 +16,9 @@
     <a href="tutorial.html" class="active">Tutorial</a>
     <a href="core.html">Core</a>
     <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html">Ecosystem</a>
   </nav>
@@ -66,7 +68,7 @@
     Node.js 18+ and npm. Familiarity with JavaScript. No framework knowledge required - we'll show React and Vue integration as optional steps.
   </div>
 
-  <!-- ═══ Step 1: Install ═══ -->
+  <!--  Step 1: Install  -->
   <h2 id="install">Install</h2>
 
   <div class="step">
@@ -82,7 +84,7 @@
 &lt;/script&gt;</code></pre>
   </div>
 
-  <!-- ═══ Step 2: First Store ═══ -->
+  <!--  Step 2: First Store  -->
   <h2 id="first-store">Your First Store</h2>
 
   <div class="step">
@@ -111,7 +113,7 @@ store.set('app.settings.theme', 'dark');</code></pre>
     <p>That's the core API: <code>get(path)</code> reads, <code>set(path, value)</code> writes. Paths are dot-separated strings that address nested state.</p>
   </div>
 
-  <!-- ═══ Step 3: Subscribe ═══ -->
+  <!--  Step 3: Subscribe  -->
   <h2 id="subscribe">Subscribe to Changes</h2>
 
   <div class="step">
@@ -130,7 +132,7 @@ unsub();</code></pre>
     <p><code>subscribe</code> returns an unsubscribe function. Call it when you're done listening. The handler receives the new value and a detail object with <code>path</code>, <code>value</code>, and <code>oldValue</code>.</p>
   </div>
 
-  <!-- ═══ Step 4: Nested Paths ═══ -->
+  <!--  Step 4: Nested Paths  -->
   <h2 id="nested">Nested Paths</h2>
 
   <div class="step">
@@ -157,7 +159,7 @@ store.subscribe('app.user.name', (name) =&gt; {
     <p>There's no limit to nesting depth. Each segment in the dot path addresses one level of the state tree.</p>
   </div>
 
-  <!-- ═══ Wildcards ═══ -->
+  <!--  Wildcards  -->
   <h2 id="wildcards">Wildcards</h2>
 
   <div class="step">
@@ -183,7 +185,7 @@ store.subscribe('*', ({ path, value }) =&gt; {
     When you call <code>store.set('user.profile.name', 'Bob')</code>, subscribers fire in order: exact (<code>user.profile.name</code>) → parent wildcard (<code>user.profile.*</code>) → grandparent wildcard (<code>user.*</code>) → global (<code>*</code>). This mirrors DOM event bubbling.
   </div>
 
-  <!-- ═══ Async ═══ -->
+  <!--  Async  -->
   <h2 id="async">Async Operations</h2>
 
   <div class="step">
@@ -210,7 +212,7 @@ store.cancel('users');  // status → 'cancelled'</code></pre>
     <p>If <code>setAsync</code> is called again while a request is in-flight, the previous request is automatically aborted. No race conditions.</p>
   </div>
 
-  <!-- ═══ Batch ═══ -->
+  <!--  Batch  -->
   <h2 id="batch">Batch Updates</h2>
 
   <div class="step">
@@ -235,7 +237,7 @@ store.setMany({
 });</code></pre>
   </div>
 
-  <!-- ═══ Three Namespaces ═══ -->
+  <!--  Three Namespaces  -->
   <h2 id="namespaces">Three Namespaces Pattern</h2>
 
   <p>The recommended convention for structuring your store. This is not enforced - it's a pattern that scales well:</p>
@@ -269,7 +271,7 @@ store.subscribe('intent.addTask', (text) =&gt; {
     <code>state.*</code> is the Model, <code>derived.*</code> is the ViewModel, <code>intent.*</code> is the Controller. All inside a single flat state tree. Components just read and publish - they never compute.
   </div>
 
-  <!-- ═══ React ═══ -->
+  <!--  React  -->
   <h2 id="with-react">With React</h2>
 
   <pre><code>npm install @everystate/react</code></pre>
@@ -301,7 +303,7 @@ function App() {
   <p><code>usePath</code> reads from the store and re-renders only when that path changes. <code>useIntent</code> returns a stable setter. Built on React 18's <code>useSyncExternalStore</code>.</p>
   <p><a href="react.html">Full React API Reference →</a></p>
 
-  <!-- ═══ Vue ═══ -->
+  <!--  Vue  -->
   <h2 id="with-vue">With Vue</h2>
 
   <pre><code>npm install @everystate/vue</code></pre>
@@ -328,7 +330,7 @@ const setCount = useIntent('state.count');
   <p><code>usePath</code> returns a read-only <code>computed</code> ref. Under the hood it creates a <code>ref</code>, subscribes on mount, and unsubscribes on unmount.</p>
   <p><a href="vue.html">Full Vue API Reference →</a></p>
 
-  <!-- ═══ Vanilla JS ═══ -->
+  <!--  Vanilla JS  -->
   <h2 id="with-vanilla">With Vanilla JS</h2>
 
   <pre><code>&lt;!DOCTYPE html&gt;
@@ -354,7 +356,7 @@ const setCount = useIntent('state.count');
 &lt;/html&gt;</code></pre>
   <p>No framework, no build step. Works in any browser that supports ES modules.</p>
 
-  <!-- ═══ Derived State ═══ -->
+  <!--  Derived State  -->
   <h2 id="derived-state">Derived State</h2>
 
   <p>Computed values are just subscribers that write to <code>derived.*</code>:</p>
@@ -378,7 +380,7 @@ recomputeFiltered(); // initial computation</code></pre>
 
   <p>Components read from <code>derived.*</code> - they never compute. This keeps views pure and logic testable.</p>
 
-  <!-- ═══ CSS State ═══ -->
+  <!--  CSS State  -->
   <h2 id="css-state">State-Driven CSS</h2>
 
   <pre><code>npm install @everystate/css</code></pre>
@@ -403,7 +405,7 @@ store.set('token.color.primary', '#ef4444');</code></pre>
 
   <p><a href="css.html">Full CSS API Reference →</a></p>
 
-  <!-- ═══ Testing ═══ -->
+  <!--  Testing  -->
   <h2 id="testing">Testing</h2>
 
   <p>Because business logic lives in subscribers (not components), you can test everything without mounting a single component:</p>
@@ -435,7 +437,7 @@ t.assertPath('user.name', 'Bob');
 t.assertType('user.name', 'string');
 t.assertEventFired('user.name', 1);</code></pre>
 
-  <!-- ═══ Next Steps ═══ -->
+  <!--  Next Steps  -->
   <h2 id="next-steps">Next Steps</h2>
 
   <ul>

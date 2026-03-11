@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@everystate/solid - API Reference</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
+    <a href="react.html">React</a>
+    <a href="solid.html" class="active">Solid</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://www.npmjs.com/package/@everystate/solid">npm</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">&#9790;</button>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <h3>Getting Started</h3>
+  <ul>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#quick-start">Quick Start</a></li>
+  </ul>
+  <h3>API</h3>
+  <ul>
+    <li><a href="#usePath">usePath</a></li>
+    <li><a href="#useIntent">useIntent</a></li>
+    <li><a href="#useWildcard">useWildcard</a></li>
+    <li><a href="#useAsync">useAsync</a></li>
+  </ul>
+  <h3>Patterns</h3>
+  <ul>
+    <li><a href="#context">Context Pattern</a></li>
+    <li><a href="#namespaces">Three Namespaces</a></li>
+    <li><a href="#fine-grained">Fine-Grained Updates</a></li>
+    <li><a href="#testing">Testing</a></li>
+  </ul>
+</aside>
+
+<main class="main">
+  <h1>@everystate/solid <span class="version-badge">1.0.1</span></h1>
+  <p>Solid adapter for <a href="core.html">@everystate/core</a>. Four functions - the entire API. ~30 lines.</p>
+  <p>See a complete task manager: <a href="solid-example.html">Solid Example</a></p>
+
+  <h2 id="install">Install</h2>
+  <div class="install-wrap">
+    <pre><code>npm install @everystate/solid @everystate/core</code></pre>
+    <button class="copy-btn" onclick="__copy('npm install @everystate/solid @everystate/core', this)">Copy</button>
+  </div>
+  <p>Peers: <code>solid-js &gt;=1.6.0</code>, <code>@everystate/core &gt;=1.0.5</code>.</p>
+
+  <h2 id="quick-start">Quick Start</h2>
+  <pre><code>import { createEveryState } from '@everystate/core';
+import { usePath, useIntent } from '@everystate/solid';
+
+const store = createEveryState({ state: { count: 0 } });
+
+store.subscribe('intent.increment', () =&gt; {
+  store.set('state.count', store.get('state.count') + 1);
+});
+
+function Counter() {
+  const count = usePath(store, 'state.count');
+  const inc = useIntent(store, 'intent.increment');
+  return &lt;button onClick={() =&gt; inc(true)}&gt;{count()}&lt;/button&gt;;
+}</code></pre>
+
+  <h2 id="usePath">usePath(store, path)</h2>
+  <div class="api-sig">usePath&lt;T&gt;(store, path) &rarr; Accessor&lt;T&gt;</div>
+  <p>Read-only Solid accessor. Updates when store value changes. Fine-grained by default - only computations reading this accessor re-run.</p>
+  <pre><code>const count = usePath(store, 'state.taskCount');
+const items = usePath(store, 'derived.tasks.filtered');</code></pre>
+
+  <h2 id="useIntent">useIntent(store, path)</h2>
+  <div class="api-sig">useIntent(store, path) &rarr; (value) &rarr; any</div>
+  <p>Stable setter function. Publishes intent to the store.</p>
+  <pre><code>const add = useIntent(store, 'intent.addTask');
+const toggle = useIntent(store, 'intent.toggleTask');</code></pre>
+
+  <h2 id="useWildcard">useWildcard(store, path)</h2>
+  <div class="api-sig">useWildcard&lt;T&gt;(store, wildcardPath) &rarr; Accessor&lt;T&gt;</div>
+  <p>Re-runs when any child of the path changes.</p>
+  <pre><code>const user = useWildcard(store, 'state.user.*');</code></pre>
+
+  <h2 id="useAsync">useAsync(store, path)</h2>
+  <div class="api-sig">useAsync(store, path) &rarr; { data, status, error, execute, cancel }</div>
+  <p>Async lifecycle with auto-abort. Each field is a Solid accessor.</p>
+  <pre><code>const { data, status, execute } = useAsync(store, 'users');
+execute((signal) =&gt; fetch('/api/users', { signal }).then(r =&gt; r.json()));</code></pre>
+
+  <h2 id="context">Context Pattern (Optional)</h2>
+  <p>Unlike React/Vue where the provider is essentially required, in Solid passing the store as a prop is perfectly idiomatic. But if you prefer DI:</p>
+  <pre><code>import { createContext, useContext } from 'solid-js';
+
+const StoreContext = createContext();
+
+function App() {
+  const store = createEveryState({ state: { count: 0 } });
+  return (
+    &lt;StoreContext.Provider value={store}&gt;
+      &lt;Counter /&gt;
+    &lt;/StoreContext.Provider&gt;
+  );
+}
+
+function useStore() { return useContext(StoreContext); }</code></pre>
+
+  <h2 id="namespaces">Three Namespaces</h2>
+  <table>
+    <thead><tr><th>Namespace</th><th>Purpose</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td><code>state.*</code></td><td>Application state</td><td><code>usePath</code></td></tr>
+      <tr><td><code>derived.*</code></td><td>Computed projections</td><td><code>usePath</code></td></tr>
+      <tr><td><code>intent.*</code></td><td>UI signals</td><td><code>useIntent</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="fine-grained">Fine-Grained Updates</h2>
+  <p>Solid has no virtual DOM. When <code>usePath</code> returns an accessor that changes, only the exact DOM expression reading it updates. No diffing, no reconciliation, no component re-renders. This is the most efficient bridge possible - EveryState fires per-path, Solid updates per-signal.</p>
+
+  <h2 id="testing">Testing Without Solid</h2>
+  <pre><code>test('add task increments count', () =&gt; {
+  const store = createEveryState({ state: { tasks: [], taskCount: 0 } });
+  store.subscribe('intent.addTask', (text) =&gt; {
+    const tasks = store.get('state.tasks') || [];
+    const next = [...tasks, { text, done: false }];
+    store.set('state.tasks', next);
+    store.set('state.taskCount', next.length);
+  });
+  store.set('intent.addTask', 'test');
+  expect(store.get('state.taskCount')).toBe(1);
+});</code></pre>
+  <p>No createRoot. No renderToString. Just state in, state out.</p>
+
+  <footer class="site-footer">
+    <p>MIT &copy; Ajdin Imsirovic &middot; <a href="https://www.npmjs.com/package/@everystate/solid">npm</a> &middot; <a href="https://github.com/ImsirovicAjdin/everystate-solid">GitHub</a></p>
+  </footer>
+</main>
+
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+</body>
+</html>

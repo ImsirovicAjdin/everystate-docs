@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ecosystem — EveryState</title>
+  <title>Ecosystem - EveryState</title>
   <meta name="description" content="Complete ecosystem reference for EveryState: router, renderer, view, perf, test, aliases, types, and examples.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -18,6 +18,7 @@
     <a href="css.html">CSS</a>
     <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html" class="active">Ecosystem</a>
   </nav>
@@ -38,6 +39,7 @@
   <ul>
     <li><a href="angular.html">@everystate/angular</a></li>
     <li><a href="react.html">@everystate/react</a></li>
+    <li><a href="solid.html">@everystate/solid</a></li>
     <li><a href="vue.html">@everystate/vue</a></li>
   </ul>
   <h3>Tools</h3>
@@ -70,6 +72,7 @@
       <tr><td><a href="#view">@everystate/view</a></td><td>State-driven view: DOMless resolve + surgical DOM projector</td><td>MIT</td></tr>
       <tr><td><a href="angular.html">@everystate/angular</a></td><td>Angular 17+ signals adapter</td><td>MIT</td></tr>
       <tr><td><a href="react.html">@everystate/react</a></td><td>React 18 hooks adapter</td><td>MIT</td></tr>
+      <tr><td><a href="solid.html">@everystate/solid</a></td><td>Solid signals adapter</td><td>MIT</td></tr>
       <tr><td><a href="vue.html">@everystate/vue</a></td><td>Vue 3 composables adapter</td><td>MIT</td></tr>
       <tr><td><a href="#renderer">@everystate/renderer</a></td><td>Direct-binding reactive renderer. Zero build step</td><td>MIT</td></tr>
       <tr><td><a href="#router">@everystate/router</a></td><td>SPA routing as state</td><td>MIT</td></tr>
@@ -81,9 +84,9 @@
     </tbody>
   </table>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- VIEW -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="view">@everystate/view <span class="version-badge">1.1.1</span></h2>
   <p>DOM structure as first-class state. Describe your view tree as a plain object in the store, then project it to the real DOM with surgical updates.</p>
 
@@ -94,8 +97,8 @@
 
   <h3>How it works</h3>
   <ol>
-    <li><strong>Resolve</strong> — a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
-    <li><strong>Project</strong> — diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
+    <li><strong>Resolve</strong> - a DOMless pass that transforms your view-state into a normalized virtual tree. No DOM touching, pure computation.</li>
+    <li><strong>Project</strong> - diffs the resolved tree against the current DOM and applies only the minimal changes needed.</li>
   </ol>
 
   <pre><code>import { createEveryState } from '@everystate/core';
@@ -119,11 +122,11 @@ const app = createApp(store, document.getElementById('app'));</code></pre>
 
   <p><a href="https://www.npmjs.com/package/@everystate/view">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-view">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- RENDERER -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="renderer">@everystate/renderer <span class="version-badge">1.0.3</span></h2>
-  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes — the renderer connects them to your store. Zero build step.</p>
+  <p>Direct-binding reactive renderer. Write HTML with <code>bind-*</code>, <code>set</code>, and <code>each</code> attributes - the renderer connects them to your store. Zero build step.</p>
 
   <div class="install-wrap">
     <pre><code>npm install @everystate/renderer @everystate/core</code></pre>
@@ -152,9 +155,9 @@ const app = createApp(store, document.getElementById('app'));</code></pre>
 
   <p><a href="https://www.npmjs.com/package/@everystate/renderer">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-renderer">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- ROUTER -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="router">@everystate/router <span class="version-badge">1.0.6</span></h2>
   <p>SPA routing as state. Routes, params, query strings, and navigation history live in your EveryState store at <code>ui.route.*</code>.</p>
 
@@ -188,9 +191,9 @@ store.set('intent.navigate', '/about');</code></pre>
 
   <p><a href="https://www.npmjs.com/package/@everystate/router">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-router">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- PERF -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="perf">@everystate/perf <span class="version-badge">1.0.4</span></h2>
   <p>Non-invasive performance monitoring for EveryState stores. Method wrapping, path heatmaps, timeline recording, and a browser overlay.</p>
 
@@ -213,9 +216,9 @@ const perf = createPerfMonitor(store);
 
   <p><a href="https://www.npmjs.com/package/@everystate/perf">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-perf">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- TEST -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="test">@everystate/test <span class="version-badge">1.0.4</span></h2>
   <p>Event-sequence testing library for EveryState stores. Trigger state changes and assert values, types, shapes, and event firings. Zero dependency.</p>
 
@@ -259,9 +262,9 @@ if (results.failed &gt; 0) process.exit(1);</code></pre>
 
   <p><a href="https://www.npmjs.com/package/@everystate/test">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-test">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- ALIASES -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="aliases">@everystate/aliases <span class="version-badge">1.0.3</span></h2>
   <p>Ergonomic single-character and short-name DOM aliases for vanilla JavaScript. Write less boilerplate when working with the DOM directly.</p>
 
@@ -289,9 +292,9 @@ attr(div, 'data-active', 'true');</code></pre>
 
   <p><a href="https://www.npmjs.com/package/@everystate/aliases">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-aliases">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- TYPES -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="types">@everystate/types <span class="version-badge">1.0.3</span></h2>
   <p>Typed dot-path autocomplete for EveryState stores via recursive TypeScript template-literal types. Get <code>store.get('user.profile.name')</code> autocomplete in your IDE.</p>
 
@@ -312,11 +315,11 @@ type Paths = DotPaths&lt;AppState&gt;;
 
   <p><a href="https://www.npmjs.com/package/@everystate/types">npm</a> · <a href="https://github.com/ImsirovicAjdin/everystate-types">GitHub</a></p>
 
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <!-- EXAMPLES -->
-  <!-- ═══════════════════════════════════════════════ -->
+  <!--  -->
   <h2 id="examples">@everystate/examples <span class="version-badge">1.0.0</span></h2>
-  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file — no build step needed.</p>
+  <p>Working examples: counters, dashboards, async patterns, data tables, theme switching. Each example is a standalone HTML file - no build step needed.</p>
 
   <div class="install-wrap">
     <pre><code>npm install @everystate/examples</code></pre>

@@ -16,7 +16,9 @@
     <a href="tutorial.html">Tutorial</a>
     <a href="core.html">Core</a>
     <a href="css.html" class="active">CSS</a>
+    <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html">Ecosystem</a>
   </nav>
@@ -79,7 +81,7 @@
   </ul>
   <p>Both use the same <code>get</code>/<code>set</code>/<code>subscribe</code> pattern as the core store. CSS rules are state. Tokens are state. Themes are state transitions.</p>
 
-  <!-- ═══ Style Engine ═══ -->
+  <!--  Style Engine  -->
   <h2 id="style-engine">Style Engine</h2>
   <div class="api-sig">createStyleEngine(store) → styleEngine</div>
   <p>Creates a style engine that compiles dot-path state to real CSS rules via the CSSOM.</p>
@@ -125,7 +127,7 @@ store.set('css..card.backgroundColor', '#1e293b');
 // Later - the stylesheet rule updates in place
 store.set('css..card.backgroundColor', '#0f172a');</code></pre>
 
-  <!-- ═══ Design System ═══ -->
+  <!--  Design System  -->
   <h2 id="design-system">Design System</h2>
   <div class="api-sig">createDesignSystem(store) → designSystem</div>
   <p>Creates a design system that stores tokens as state and provides reactive bindings to styles.</p>
@@ -176,7 +178,7 @@ function toggleTheme() {
   store.set('theme.mode', next);
 }</code></pre>
 
-  <!-- ═══ CSS State v1 ═══ -->
+  <!--  CSS State v1  -->
   <h2 id="css-state">CSS State (v1 API)</h2>
   <div class="api-sig">createCssState(initial?: object) → cssStateManager</div>
   <p>The original CSS state manager. Stores state directly in CSS custom properties (<code>--key: value</code>) on <code>:root</code> and as <code>data-*</code> attributes on elements.</p>
@@ -214,7 +216,7 @@ unobserve();</code></pre>
 &lt;!-- Sets state on click --&gt;
 &lt;button data-state-action="theme" data-state-value="dark"&gt;Dark Mode&lt;/button&gt;</code></pre>
 
-  <!-- ═══ Use Cases ═══ -->
+  <!--  Use Cases  -->
   <h2 id="wordpress">WordPress / Static Sites</h2>
   <p>Drop a <code>&lt;script&gt;</code> tag into your theme. No build step, no React, no webpack:</p>
   <pre><code>&lt;script type="module"&gt;

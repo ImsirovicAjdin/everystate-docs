@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EveryState + Solid - Complete Example</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <style>
+    .main.landing { max-width: 1060px; }
+    .example-intro { text-align: center; padding: 2rem 0 1rem; }
+    .example-intro h1 { font-size: 2rem; }
+    .example-intro p { color: var(--text-muted); max-width: 640px; margin: 0 auto 0.5rem; }
+    .file-block { margin-bottom: 1.5rem; }
+    .file-block-header { display: flex; align-items: center; gap: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 16px; font-size: 13px; font-weight: 600; font-family: monospace; color: var(--text-muted); }
+    .file-block-header .file-icon { color: var(--accent); }
+    .file-block-header .file-badge { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 1rem; background: var(--accent-subtle); color: var(--accent); }
+    .file-block pre { margin: 0; border-radius: 0 0 8px 8px; border: 1px solid var(--border); border-top: none; }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="logo">EveryState</a>
+  <nav>
+    <a href="tutorial.html">Tutorial</a>
+    <a href="core.html">Core</a>
+    <a href="css.html">CSS</a>
+    <a href="angular.html">Angular</a>
+    <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
+    <a href="vue.html">Vue</a>
+    <a href="ecosystem.html">Ecosystem</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://www.npmjs.com/package/@everystate/solid">npm</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme">&#9790;</button>
+  </div>
+</header>
+<main class="main landing">
+  <div class="example-intro">
+    <h1>EveryState + Solid</h1>
+    <p>A complete task manager. Every file shown below.</p>
+    <p style="font-size:0.85rem;">Install: <code>npm i @everystate/core @everystate/solid solid-js</code></p>
+  </div>
+
+  <div class="features" style="margin-bottom:2rem;">
+    <div class="feature-card blue"><h3>5 files, ~140 lines</h3><p>Store setup, 4 components, composition root.</p></div>
+    <div class="feature-card green"><h3>Zero component re-renders</h3><p>Component functions run once. Only signal accessors update.</p></div>
+    <div class="feature-card purple"><h3>No props drilling</h3><p>Components read from the store directly.</p></div>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JS</span> store.js <span class="file-badge">Store + Logic</span></div>
+    <pre><code>import { createEveryState } from '@everystate/core';
+
+export const store = createEveryState({
+  state: { tasks: [], taskCount: 0, filter: 'all' },
+  derived: { tasks: { filtered: [] } }
+});
+
+// Intent handlers - business logic lives here, not in components
+store.subscribe('intent.addTask', (text) =&gt; {
+  const t = String(text || '').trim();
+  if (!t) return;
+  const tasks = store.get('state.tasks') || [];
+  const next = [...tasks, { id: Date.now().toString(36), text: t, completed: false, important: /!/i.test(t) }];
+  store.set('state.tasks', next);
+  store.set('state.taskCount', next.length);
+});
+
+store.subscribe('intent.toggleTask', (id) =&gt; {
+  const tasks = store.get('state.tasks') || [];
+  store.set('state.tasks', tasks.map(x =&gt; x.id === id ? { ...x, completed: !x.completed } : x));
+});
+
+store.subscribe('intent.deleteTask', (id) =&gt; {
+  const tasks = store.get('state.tasks') || [];
+  const next = tasks.filter(x =&gt; x.id !== id);
+  store.set('state.tasks', next);
+  store.set('state.taskCount', next.length);
+});
+
+store.subscribe('intent.changeFilter', (f) =&gt; store.set('state.filter', f));
+
+// Derived state
+const recompute = () =&gt; {
+  const tasks = store.get('state.tasks') || [];
+  const f = store.get('state.filter');
+  store.set('derived.tasks.filtered',
+    f === 'active' ? tasks.filter(t =&gt; !t.completed)
+    : f === 'completed' ? tasks.filter(t =&gt; t.completed)
+    : f === 'important' ? tasks.filter(t =&gt; t.important) : tasks);
+};
+store.subscribe('state.tasks', recompute);
+store.subscribe('state.filter', recompute);
+recompute();</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JSX</span> Header.jsx <span class="file-badge">Read-only</span></div>
+    <pre><code>import { usePath } from '@everystate/solid';
+import { store } from './store';
+
+export function Header() {
+  const count = usePath(store, 'state.taskCount');
+  return (
+    &lt;header&gt;
+      &lt;div class="title"&gt;Solid + EveryState&lt;/div&gt;
+      &lt;div class="badge"&gt;{count()} task{count() !== 1 ? 's' : ''}&lt;/div&gt;
+    &lt;/header&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JSX</span> TaskInput.jsx <span class="file-badge">Local + intent</span></div>
+    <pre><code>import { useIntent } from '@everystate/solid';
+import { store } from './store';
+
+export function TaskInput() {
+  let input;
+  const addTask = useIntent(store, 'intent.addTask');
+
+  const submit = () =&gt; {
+    addTask(input.value);
+    input.value = '';
+  };
+
+  return (
+    &lt;div class="card"&gt;
+      &lt;div class="input-row"&gt;
+        &lt;input ref={input} placeholder="What needs to be done?"
+               onKeyDown={(e) =&gt; e.key === 'Enter' &amp;&amp; submit()} /&gt;
+        &lt;button class="primary" onClick={submit}&gt;Add&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JSX</span> Filters.jsx <span class="file-badge">Read + publish</span></div>
+    <pre><code>import { usePath, useIntent } from '@everystate/solid';
+import { store } from './store';
+
+export function Filters() {
+  const filter = usePath(store, 'state.filter');
+  const setFilter = useIntent(store, 'intent.changeFilter');
+
+  return (
+    &lt;div class="card filters"&gt;
+      &lt;button classList={{ active: filter() === 'all' }} onClick={() =&gt; setFilter('all')}&gt;All&lt;/button&gt;
+      &lt;button classList={{ active: filter() === 'active' }} onClick={() =&gt; setFilter('active')}&gt;Active&lt;/button&gt;
+      &lt;button classList={{ active: filter() === 'completed' }} onClick={() =&gt; setFilter('completed')}&gt;Done&lt;/button&gt;
+      &lt;button classList={{ active: filter() === 'important' }} onClick={() =&gt; setFilter('important')}&gt;Important&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JSX</span> TaskList.jsx <span class="file-badge">Derived + intents</span></div>
+    <pre><code>import { usePath, useIntent } from '@everystate/solid';
+import { For } from 'solid-js';
+import { store } from './store';
+
+export function TaskList() {
+  const items = usePath(store, 'derived.tasks.filtered');
+  const toggle = useIntent(store, 'intent.toggleTask');
+  const del = useIntent(store, 'intent.deleteTask');
+
+  return (
+    &lt;div class="card"&gt;
+      &lt;ul&gt;
+        &lt;For each={items()}&gt;{(task) =&gt;
+          &lt;li&gt;
+            &lt;input type="checkbox" checked={task.completed} onChange={() =&gt; toggle(task.id)} /&gt;
+            &lt;span&gt;{task.text}&lt;/span&gt;
+            &lt;div class="right"&gt;
+              {task.important &amp;&amp; &lt;span class="pill"&gt;Important&lt;/span&gt;}
+              &lt;button onClick={() =&gt; del(task.id)}&gt;Delete&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/li&gt;
+        }&lt;/For&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JSX</span> App.jsx <span class="file-badge">Composition</span></div>
+    <pre><code>import { Header } from './Header';
+import { Filters } from './Filters';
+import { TaskInput } from './TaskInput';
+import { TaskList } from './TaskList';
+
+export function App() {
+  return (
+    &lt;div class="app"&gt;
+      &lt;Header /&gt;
+      &lt;div class="container"&gt;
+        &lt;Filters /&gt;
+        &lt;TaskInput /&gt;
+        &lt;TaskList /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h2 style="border:none; text-align:center; margin-top:2rem;">The Adapter Source</h2>
+  <p style="text-align:center; color:var(--text-muted); margin-bottom:1rem;">This is the entire <code>@everystate/solid</code> package. ~30 lines.</p>
+
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JS</span> @everystate/solid/eventStateSolid.js <span class="file-badge">~30 lines</span></div>
+    <pre><code>import { createSignal, onCleanup } from 'solid-js';
+
+export function usePath(store, path) {
+  const [value, setValue] = createSignal(store.get(path));
+  const unsub = store.subscribe(path, (val) =&gt; setValue(() =&gt; val));
+  onCleanup(unsub);
+  return value;
+}
+
+export function useIntent(store, path) {
+  return (value) =&gt; store.set(path, value);
+}
+
+export function useWildcard(store, wildcardPath) {
+  const parentPath = wildcardPath.endsWith('.*') ? wildcardPath.slice(0, -2) : wildcardPath;
+  const [value, setValue] = createSignal(store.get(parentPath));
+  const unsub = store.subscribe(wildcardPath, () =&gt; setValue(() =&gt; store.get(parentPath)));
+  onCleanup(unsub);
+  return value;
+}
+
+export function useAsync(store, path) {
+  return {
+    data: usePath(store, path + '.data'),
+    status: usePath(store, path + '.status'),
+    error: usePath(store, path + '.error'),
+    execute: (fetcher) =&gt; store.setAsync(path, fetcher),
+    cancel: () =&gt; store.cancel(path),
+  };
+}</code></pre>
+  </div>
+
+  <h2 style="border:none; text-align:center;">Testing Without Solid</h2>
+  <div class="file-block">
+    <div class="file-block-header"><span class="file-icon">JS</span> store.test.js <span class="file-badge">No createRoot</span></div>
+    <pre><code>import { store } from './store';
+
+test('adding a task increments taskCount', () =&gt; {
+  store.set('intent.addTask', 'Buy groceries');
+  expect(store.get('state.taskCount')).toBe(1);
+  expect(store.get('state.tasks')[0].text).toBe('Buy groceries');
+});
+
+test('filter shows only active tasks', () =&gt; {
+  store.set('intent.addTask', 'task 1');
+  store.set('intent.addTask', 'task 2');
+  store.set('intent.toggleTask', store.get('state.tasks')[0].id);
+  store.set('intent.changeFilter', 'active');
+  expect(store.get('derived.tasks.filtered')).toHaveLength(1);
+});</code></pre>
+  </div>
+
+  <footer class="site-footer">
+    <p>MIT &copy; Ajdin Imsirovic &middot; <a href="https://www.npmjs.com/package/@everystate/solid">npm</a> &middot; <a href="https://github.com/ImsirovicAjdin/everystate-solid">GitHub</a></p>
+  </footer>
+</main>
+<script>
+function __copy(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied!';
+    setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+  });
+}
+</script>
+</body>
+</html>

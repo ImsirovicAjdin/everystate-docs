@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EveryState — Path-based state management for every framework</title>
+  <title>EveryState - Path-based state management for every framework</title>
   <meta name="description" content="Observable state management with dot-path addressing, wildcard subscriptions, async support, and state-driven CSS. Zero dependencies. Works with React, Vue, Angular, or vanilla JS.">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
@@ -18,6 +18,7 @@
     <a href="css.html">CSS</a>
     <a href="angular.html">Angular</a>
     <a href="react.html">React</a>
+    <a href="solid.html">Solid</a>
     <a href="vue.html">Vue</a>
     <a href="ecosystem.html">Ecosystem</a>
   </nav>
@@ -31,11 +32,11 @@
 
 <main class="main landing">
 
-  <!-- ═══ Hero ═══ -->
+  <!--  Hero  -->
   <div class="hero">
     <h1>EveryState</h1>
-    <p class="tagline">Observable state management with dot-path addressing.<br>Works with React, Vue, Angular, or no framework at all.</p>
-    <p class="sub">get · set · subscribe — that's the whole API. ~6 KB, zero dependencies.</p>
+    <p class="tagline">Observable state management with dot-path addressing.<br>Works with React, Vue, Angular, Solid, or no framework at all.</p>
+    <p class="sub">get, set, subscribe - that's the whole API. ~6 KB, zero dependencies.</p>
 
     <div class="cta-row">
       <a href="tutorial.html" class="btn btn-primary">Get Started →</a>
@@ -43,7 +44,7 @@
     </div>
   </div>
 
-  <!-- ═══ Interactive Hero Demo ═══ -->
+  <!--  Interactive Hero Demo  -->
   <div class="hero-demo">
     <div class="hero-code">
       <div class="hero-code-header">
@@ -67,7 +68,7 @@
     </div>
   </div>
 
-  <!-- ═══ Why EveryState ═══ -->
+  <!--  Why EveryState  -->
   <h2 style="border:none; text-align:center; margin-top:3.5rem;">Why EveryState?</h2>
 
   <div class="why-grid">
@@ -97,7 +98,7 @@
     </div>
   </div>
 
-  <!-- ═══ Feature Cards ═══ -->
+  <!--  Feature Cards  -->
   <h2 style="border:none; text-align:center; margin-top:3rem;">The Ecosystem</h2>
   <p style="text-align:center; color:var(--text-muted); margin-bottom:1.5rem;">Every package is MIT-licensed, independently versioned, and has zero third-party dependencies.</p>
 
@@ -115,12 +116,16 @@
       <p>React 18 adapter. <code>usePath</code>, <code>useIntent</code>, <code>useWildcard</code>, <code>useAsync</code> hooks + <code>EventStateProvider</code>.</p>
     </div>
     <div class="feature-card green">
+      <h3>@everystate/solid</h3>
+      <p>Solid adapter. <code>usePath</code>, <code>useIntent</code>, <code>useWildcard</code>, <code>useAsync</code> bridged to Solid signals.</p>
+    </div>
+    <div class="feature-card green">
       <h3>@everystate/vue</h3>
       <p>Vue 3 adapter. <code>provideStore</code>, <code>usePath</code>, <code>useIntent</code>, <code>useWildcard</code>, <code>useAsync</code> composables.</p>
     </div>
     <div class="feature-card purple">
       <h3>@everystate/css</h3>
-      <p>State-driven CSSOM engine. Reactive design tokens, typed validation, WCAG contrast enforcement — all via dot paths.</p>
+      <p>State-driven CSSOM engine. Reactive design tokens, typed validation, WCAG contrast enforcement - all via dot paths.</p>
     </div>
     <div class="feature-card purple">
       <h3>@everystate/view</h3>
@@ -140,7 +145,7 @@
     </div>
   </div>
 
-  <!-- ═══ Ecosystem Table ═══ -->
+  <!--  Ecosystem Table  -->
   <table class="ecosystem-table">
     <thead>
       <tr><th>Package</th><th>Description</th><th>Type</th></tr>
@@ -164,6 +169,11 @@
       <tr>
         <td><a href="react.html">@everystate/react</a></td>
         <td>React 18 hooks adapter: <code>usePath</code>, <code>useIntent</code>, <code>useAsync</code></td>
+        <td><span class="badge badge-adapter">adapter</span></td>
+      </tr>
+      <tr>
+        <td><a href="solid.html">@everystate/solid</a></td>
+        <td>Solid signals adapter: <code>usePath</code>, <code>useIntent</code>, <code>useAsync</code></td>
         <td><span class="badge badge-adapter">adapter</span></td>
       </tr>
       <tr>
@@ -214,25 +224,25 @@
     </tbody>
   </table>
 
-  <!-- ═══ Comparison ═══ -->
+  <!--  Comparison  -->
   <h2 style="border:none; text-align:center;">How It Compares</h2>
   <table class="compare-table">
     <thead>
       <tr><th>Feature</th><th>EveryState</th><th>Redux</th><th>Zustand</th><th>Pinia</th></tr>
     </thead>
     <tbody>
-      <tr><td>Framework-agnostic</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
-      <tr><td>Dot-path addressing</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
-      <tr><td>Wildcard subscriptions</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
-      <tr><td>Built-in async lifecycle</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
-      <tr><td>State-driven CSS</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
-      <tr><td>Zero dependencies</td><td class="check">✓</td><td class="cross">—</td><td class="check">✓</td><td class="cross">—</td></tr>
-      <tr><td>No build step needed</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
-      <tr><td>Test without framework</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td></tr>
+      <tr><td>Framework-agnostic</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
+      <tr><td>Dot-path addressing</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
+      <tr><td>Wildcard subscriptions</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
+      <tr><td>Built-in async lifecycle</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
+      <tr><td>State-driven CSS</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
+      <tr><td>Zero dependencies</td><td class="check">✓</td><td class="cross">-</td><td class="check">✓</td><td class="cross">-</td></tr>
+      <tr><td>No build step needed</td><td class="check">✓</td><td class="cross">-</td><td class="cross">-</td><td class="cross">-</td></tr>
+      <tr><td>Test without framework</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="cross">-</td></tr>
     </tbody>
   </table>
 
-  <!-- ═══ Quick code comparison ═══ -->
+  <!--  Quick code comparison  -->
   <h2 style="border:none; text-align:center;">Three Lines to Reactive State</h2>
   <pre><code>import { createEveryState } from '@everystate/core';
 
@@ -261,7 +271,7 @@ function __copy(text, btn) {
   });
 }
 
-// ═══ Interactive Hero Demo ═══
+//  Interactive Hero Demo 
 (function() {
   function createMiniStore(initial) {
     var state = JSON.parse(JSON.stringify(initial));
