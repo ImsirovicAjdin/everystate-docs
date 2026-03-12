@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How We Got @everystate/vue to Green CI - EveryState.js Blog</title>
+  <meta name="description" content="The full story of taking @everystate/vue from basic tests to edge-case coverage, beautiful test output, and a fully green GitHub Actions CI pipeline.">
+  <link rel="stylesheet" href="../style.css">
+  <script src="../theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState.js</a>
+  <nav>
+    <a href="../tutorial.html">Tutorial</a>
+    <a href="../core.html">Core</a>
+    <a href="../vue.html">Vue</a>
+    <a href="../react.html">React</a>
+    <a href="../ecosystem.html">Ecosystem</a>
+    <a href="/blog/" class="active">Blog</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://github.com/ImsirovicAjdin" class="star-link">GitHub</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme"></button>
+  </div>
+</header>
+
+<main class="blog-layout">
+
+  <!-- Post header -->
+  <div class="post-header">
+    <h1>How We Got @everystate/vue to Green CI</h1>
+    <div class="post-meta">
+      <span>Ajdin Imsirovic</span>
+      <span class="dot">/</span>
+      <span>March 12, 2026</span>
+      <span class="dot">/</span>
+      <span>15 min read</span>
+    </div>
+    <div class="post-tags">
+      <a href="/blog/?tag=ci">CI</a>
+      <a href="/blog/?tag=testing">Testing</a>
+      <a href="/blog/?tag=npm">npm</a>
+      <a href="/blog/?tag=github-actions">GitHub Actions</a>
+      <a href="/blog/?tag=vue">Vue</a>
+      <a href="/blog/?tag=tutorial">Tutorial</a>
+    </div>
+  </div>
+
+  <!-- Table of contents -->
+  <div class="post-toc">
+    <div class="post-toc-title">Table of Contents</div>
+    <ol>
+      <li><a href="#starting-point">The Starting Point</a></li>
+      <li><a href="#what-are-tests">What Are Tests and Why Do They Matter?</a></li>
+      <li><a href="#two-layers">The Two Layers of Testing in This Package</a></li>
+      <li><a href="#edge-cases">Adding Edge Case Tests</a></li>
+      <li><a href="#beautiful-output">Making Test Output Beautiful</a></li>
+      <li><a href="#what-is-ci">What Is CI and Why Do We Need It?</a></li>
+      <li><a href="#github-actions">Creating the GitHub Actions Workflow</a></li>
+      <li><a href="#failure-1">CI Failure #1: Missing Dependencies</a></li>
+      <li><a href="#failure-2">CI Failure #2: Peer Dependency Resolution</a></li>
+      <li><a href="#failure-3">CI Failure #3: Stale Lockfile</a></li>
+      <li><a href="#final-fix">The Final Fix</a></li>
+      <li><a href="#publishing">Publishing the Updated Test Runner</a></li>
+      <li><a href="#versions">Version History</a></li>
+      <li><a href="#lessons">Key Lessons Learned</a></li>
+    </ol>
+  </div>
+
+  <!-- Post body -->
+  <div class="post-body">
+
+    <h2 id="starting-point">1. The Starting Point</h2>
+
+    <p><code>@everystate/vue</code> is a Vue 3 adapter for the EveryState.js state management library. It provides composables like <code>usePath</code>, <code>useIntent</code>, <code>useWildcard</code>, and <code>useAsync</code> that let Vue components subscribe to EveryState's path-based state.</p>
+
+    <p>The package had two test files:</p>
+
+    <ul>
+      <li><strong><code>self-test.js</code></strong> - A zero-dependency test that only needs <code>@everystate/core</code>. It verifies the store-side patterns that the Vue composables consume (subscribe, get, set, wildcards, async, batch). It has 25 assertions across 8 sections.</li>
+      <li><strong><code>tests/vue.test.js</code></strong> - An integration test suite that uses <code>@everystate/test</code> (a testing library in the same ecosystem). It had 14 test cases covering the happy path for each composable pattern.</li>
+    </ul>
+
+    <p>A Vue developer reviewed the package and gave this feedback (translated from Croatian): "It would be great to have more test cases. In tests you see use cases as the developer intended the library to be used, and maybe some edge cases. That's what separates a stable package from an alpha/beta one."</p>
+
+    <p>He also said: "When he sees green numbers like that in the console, or even better in a GitHub pipeline" - meaning he wanted to see a CI badge on the repo.</p>
+
+    <h2 id="what-are-tests">2. What Are Tests and Why Do They Matter?</h2>
+
+    <h3>What is a test?</h3>
+
+    <p>A test is a small piece of code that checks whether your code works correctly. It's like a recipe's "taste test" - you follow the recipe (run your code), then check if the result is what you expected.</p>
+
+    <p>Here's the simplest possible test:</p>
+
+    <pre><code data-lang="js">// The code we're testing
+function add(a, b) { return a + b; }
+
+// The test
+const result = add(2, 3);
+if (result !== 5) {
+  throw new Error('add(2, 3) should be 5, got ' + result);
+}</code></pre>
+
+    <p>If the code works, nothing happens. If it's broken, the test throws an error.</p>
+
+    <h3>Why do tests matter for an open-source package?</h3>
+
+    <p>When a developer evaluates whether to use your package, they look for signals of quality:</p>
+
+    <ol>
+      <li><strong>Tests show intent</strong> - A test named <code>'usePath: unsubscribe stops notifications'</code> tells the reader exactly what the library is supposed to do in that scenario. Tests are living documentation.</li>
+      <li><strong>Tests show edge cases</strong> - A test named <code>'edge: set null is a valid value'</code> tells the reader "yes, the author thought about this case, and it works." Without that test, the reader has to guess.</li>
+      <li><strong>Tests prevent regressions</strong> - When you change code, tests catch if something that used to work is now broken.</li>
+      <li><strong>Tests signal maturity</strong> - A package with 5 tests feels like alpha software. A package with 22 tests covering happy paths AND edge cases feels stable.</li>
+    </ol>
+
+    <h3>Types of tests</h3>
+
+    <ul>
+      <li><strong>Unit tests</strong> - Test a single function or method in isolation.</li>
+      <li><strong>Integration tests</strong> - Test multiple parts working together.</li>
+      <li><strong>Self-tests</strong> - A pattern we use in EveryState.js: a test that ships with the package and can be run by the end user to verify their installation works.</li>
+      <li><strong>Edge case tests</strong> - Tests that cover unusual inputs, boundary conditions, and error scenarios.</li>
+    </ul>
+
+    <h2 id="two-layers">3. The Two Layers of Testing in This Package</h2>
+
+    <h3>Layer 1: Self-test (<code>self-test.js</code>)</h3>
+
+    <p>The self-test is a standalone script that:</p>
+
+    <ul>
+      <li>Only imports <code>@everystate/core</code> (no test framework needed)</li>
+      <li>Has its own <code>assert()</code> function built in</li>
+      <li>Can be run by end users: <code>npx everystate-vue-self-test</code></li>
+      <li>Tests the store-side patterns that Vue composables consume</li>
+    </ul>
+
+    <p>Why does it exist? Because Vue composables are thin wrappers around store operations. If you prove that <code>store.subscribe()</code> + <code>store.get()</code> works correctly, you've proven that <code>usePath()</code> (which is just subscribe + ref + computed) will work too.</p>
+
+    <p>The self-test has 25 assertions across 8 sections:</p>
+
+    <pre><code data-lang="text">1. usePath pattern: subscribe + get
+2. useIntent pattern: stable setter
+3. useWildcard pattern: wildcard subscribe
+4. useAsync pattern: setAsync lifecycle
+5. useAsync error pattern
+6. Provider pattern: store as external dependency
+7. batch pattern (Vue nextTick compat)
+8. Unsubscribe pattern (onBeforeUnmount simulation)</code></pre>
+
+    <h3>Layer 2: Integration tests (<code>tests/vue.test.js</code>)</h3>
+
+    <p>The integration tests use <code>@everystate/test</code>, a testing library that provides:</p>
+
+    <ul>
+      <li><code>createEventTest(initialState)</code> - Creates a store with event spying</li>
+      <li><code>t.trigger(path, value)</code> - Sets a value (same as <code>store.set()</code>)</li>
+      <li><code>t.assertPath(path, expected)</code> - Checks the value at a path</li>
+      <li><code>t.assertType(path, type)</code> - Checks the type</li>
+      <li><code>t.assertEventFired(path, times)</code> - Checks how many times a path was notified</li>
+      <li><code>t.assertShape(path, shape)</code> - Checks an object's structure</li>
+      <li><code>runTests({ name: fn, ... })</code> - Runs all tests and prints results</li>
+    </ul>
+
+    <p>The integration tests are more expressive because <code>@everystate/test</code> provides richer assertions. They also generate type information that can be used for TypeScript type generation.</p>
+
+    <h2 id="edge-cases">4. Adding Edge Case Tests</h2>
+
+    <p>We added 8 new edge case tests to <code>tests/vue.test.js</code>, bringing the total from 14 to 22. Here's each one and why it matters:</p>
+
+    <h3>4.1. Idempotent set (same value re-fires)</h3>
+
+    <pre><code data-lang="js">'edge: setting same value still notifies subscribers': () => {
+  const store = createEveryState({ count: 1 });
+  let fires = 0;
+  store.subscribe('count', () => { fires++; });
+  store.set('count', 1);  // Same value!
+  store.set('count', 1);  // Same value again!
+  if (fires !== 2) throw new Error(`Expected 2 fires, got ${fires}`);
+  store.destroy();
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> Some state libraries (like React's <code>useState</code>) skip re-renders when the value hasn't changed. EveryState.js intentionally does NOT skip - every <code>set()</code> fires subscribers regardless. This test documents that design decision.</p>
+
+    <h3>4.2. Deep path auto-creation</h3>
+
+    <pre><code data-lang="js">'edge: deep path auto-creates intermediate objects': () => {
+  const store = createEveryState({});
+  store.set('a.b.c.d', 'deep');
+  if (store.get('a.b.c.d') !== 'deep') throw new Error('Deep path not created');
+  if (typeof store.get('a.b.c') !== 'object') throw new Error('...');
+  if (typeof store.get('a.b') !== 'object') throw new Error('...');
+  store.destroy();
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> When you do <code>store.set('a.b.c.d', value)</code> on an empty store, the library needs to create objects for <code>a</code>, <code>a.b</code>, and <code>a.b.c</code> automatically. This is a common pattern in Vue apps where you might set deeply nested state before the parent objects exist.</p>
+
+    <h3>4.3. Null as a valid value</h3>
+
+    <pre><code data-lang="js">'edge: set null is a valid value': () => {
+  const store = createEveryState({ data: { items: [1, 2, 3] } });
+  store.set('data.items', null);
+  if (store.get('data.items') !== null) throw new Error('Expected null');
+  store.destroy();
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> In Vue apps, you often reset state to <code>null</code> (e.g., clearing a selected item, resetting form data). This test proves <code>null</code> is a first-class value, not treated as "missing."</p>
+
+    <h3>4.4. Undefined as a valid value</h3>
+
+    <pre><code data-lang="js">'edge: set undefined is a valid value': () => {
+  const store = createEveryState({ flag: true });
+  store.set('flag', undefined);
+  if (store.get('flag') !== undefined) throw new Error('Expected undefined');
+  store.destroy();
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> Similar to null, but trickier. Many libraries treat <code>undefined</code> as "delete this key." EveryState.js treats it as a valid value.</p>
+
+    <h3>4.5. Multiple subscribers on the same path</h3>
+
+    <pre><code data-lang="js">'edge: multiple subscribers on same path fire independently': () => {
+  const store = createEveryState({ x: 0 });
+  let firesA = 0;
+  let firesB = 0;
+  const unsubA = store.subscribe('x', () => { firesA++; });
+  const unsubB = store.subscribe('x', () => { firesB++; });
+
+  store.set('x', 1);
+  if (firesA !== 1 || firesB !== 1) throw new Error('Both should fire once');
+
+  // Unsubscribing one does not affect the other
+  unsubA();
+  store.set('x', 2);
+  if (firesA !== 1) throw new Error('A should stay at 1 after unsub');
+  if (firesB !== 2) throw new Error('B should fire again');
+
+  unsubB();
+  store.destroy();
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> In a Vue app, multiple components might subscribe to the same path (e.g., a navbar and a sidebar both showing the user's name). When one component unmounts and unsubscribes, the other must keep receiving updates.</p>
+
+    <h3>4.6. Post-destroy safety (get/set)</h3>
+
+    <pre><code data-lang="js">'edge: get/set after destroy throws': () => {
+  const store = createEveryState({ x: 1 });
+  store.destroy();
+
+  let getThrew = false;
+  try { store.get('x'); } catch { getThrew = true; }
+  if (!getThrew) throw new Error('get() should throw after destroy');
+
+  let setThrew = false;
+  try { store.set('x', 2); } catch { setThrew = true; }
+  if (!setThrew) throw new Error('set() should throw after destroy');
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> In Vue, <code>onBeforeUnmount</code> timing can be tricky. If a store is destroyed but a component still tries to read/write, it should throw an error immediately rather than silently writing to a dead store. This prevents hard-to-debug state corruption.</p>
+
+    <h3>4.7. Post-destroy safety (subscribe)</h3>
+
+    <pre><code data-lang="js">'edge: subscribe after destroy throws': () => {
+  const store = createEveryState({ x: 1 });
+  store.destroy();
+
+  let threw = false;
+  try { store.subscribe('x', () => {}); } catch { threw = true; }
+  if (!threw) throw new Error('subscribe() should throw after destroy');
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> Same reasoning as above, but for subscriptions. A component that tries to subscribe to a destroyed store should get an immediate error.</p>
+
+    <h3>4.8. Realistic Vue app state shape</h3>
+
+    <pre><code data-lang="js">'edge: realistic Vue app state shape': () => {
+  const t = createEventTest({
+    auth: { user: null, token: null, isAuthenticated: false },
+    router: { view: 'home', path: '/', params: {} },
+    entities: { posts: {}, comments: {} },
+    ui: { theme: 'dark', sidebarOpen: false, modal: null, loading: false },
+  });
+
+  // Simulate login flow
+  t.trigger('auth.user', { id: 1, name: 'Alice', role: 'admin' });
+  t.trigger('auth.token', 'jwt-abc-123');
+  t.trigger('auth.isAuthenticated', true);
+  t.assertPath('auth.isAuthenticated', true);
+  t.assertShape('auth.user', { id: 'number', name: 'string', role: 'string' });
+
+  // Simulate route change
+  t.trigger('router.view', 'dashboard');
+  t.trigger('router.path', '/dashboard');
+  t.assertPath('router.view', 'dashboard');
+
+  // Simulate entity loading
+  t.trigger('entities.posts', { p1: { title: 'Hello', body: 'World' } });
+  t.assertShape('entities.posts.p1', { title: 'string', body: 'string' });
+
+  // Simulate UI toggles
+  t.trigger('ui.sidebarOpen', true);
+  t.trigger('ui.modal', 'confirm-delete');
+  t.assertPath('ui.modal', 'confirm-delete');
+  t.assertType('ui.loading', 'boolean');
+},</code></pre>
+
+    <p><strong>Why it matters:</strong> This test simulates a real Vue application with authentication, routing, entity management, and UI state. It shows reviewers that the library handles realistic, complex state shapes - not just toy examples.</p>
+
+    <h2 id="beautiful-output">5. Making Test Output Beautiful</h2>
+
+    <h3>The problem</h3>
+
+    <p>The original test output was functional but didn't look professional. Modern test runners like Jest and Vitest show colored output with green PASS badges, section grouping, and styled summary bars.</p>
+
+    <h3>The solution: ANSI escape codes</h3>
+
+    <p>We updated <code>@everystate/test/eventTest.js</code> to use ANSI escape codes for terminal colors:</p>
+
+    <pre><code data-lang="js">// ANSI helpers
+const g = '\x1b[32m';   // green text
+const r = '\x1b[31m';   // red text
+const d = '\x1b[2m';    // dim
+const R = '\x1b[0m';    // reset
+const passTag = '\x1b[42m\x1b[30m PASS \x1b[0m';  // green background, black text
+const failTag = '\x1b[41m\x1b[37m FAIL \x1b[0m';  // red background, white text</code></pre>
+
+    <h3>What are ANSI escape codes?</h3>
+
+    <p>ANSI escape codes are special character sequences that terminals interpret as formatting instructions. They start with <code>\x1b[</code> (the escape character followed by <code>[</code>) and end with a letter code:</p>
+
+    <ul>
+      <li><code>\x1b[32m</code> - Set text color to green</li>
+      <li><code>\x1b[42m</code> - Set background color to green</li>
+      <li><code>\x1b[30m</code> - Set text color to black</li>
+      <li><code>\x1b[0m</code> - Reset all formatting</li>
+      <li><code>\x1b[1m</code> - Bold</li>
+      <li><code>\x1b[2m</code> - Dim</li>
+    </ul>
+
+    <p>You can combine them: <code>\x1b[42m\x1b[30m PASS \x1b[0m</code> means "green background, black text, print ' PASS ', then reset."</p>
+
+    <h3>Auto-grouping by section</h3>
+
+    <p>The test runner auto-detects sections from test name prefixes:</p>
+
+    <pre><code data-lang="js">const section = name.split(':')[0] || '';
+if (section !== currentSection) {
+  currentSection = section;
+  console.log(`\n  ${d}-- ${section} --${R}`);
+}</code></pre>
+
+    <p>So tests named <code>'usePath: subscribe to exact path'</code> and <code>'usePath: nested path subscription'</code> are automatically grouped under a <code>-- usePath --</code> header.</p>
+
+    <h3>The result</h3>
+
+    <pre><code data-lang="text">  @everystate/test (22 tests)
+
+  -- usePath --
+   PASS  usePath: subscribe to exact path
+   PASS  usePath: nested path subscription
+   PASS  usePath: unsubscribe stops notifications (onBeforeUnmount)
+
+  -- edge --
+   PASS  edge: setting same value still notifies subscribers
+   PASS  edge: deep path auto-creates intermediate objects
+   ...
+
+    22 passed   (22 tests)</code></pre>
+
+    <p>In the terminal, the PASS tags render as green badges and the summary bar is a green block - just like Jest or Vitest.</p>
+
+    <h2 id="what-is-ci">6. What Is CI and Why Do We Need It?</h2>
+
+    <h3>CI = Continuous Integration</h3>
+
+    <p>CI is a practice where every code change is automatically tested. When you push code to GitHub, a server somewhere runs your tests. If they pass, you get a green checkmark. If they fail, you get a red X.</p>
+
+    <h3>Why does this matter for open-source?</h3>
+
+    <ol>
+      <li><strong>Credibility</strong> - A green CI badge on your README tells potential users "this code is tested and working." It's the #1 signal of a maintained project.</li>
+      <li><strong>Catches environment issues</strong> - Your code works on your machine, but does it work on a clean Ubuntu server with a different Node.js version? CI tests this.</li>
+      <li><strong>Prevents broken releases</strong> - If you accidentally break something, CI catches it before users install the broken version.</li>
+    </ol>
+
+    <h3>What is GitHub Actions?</h3>
+
+    <p>GitHub Actions is GitHub's built-in CI service. It's free for public repos. You define a workflow in a YAML file, and GitHub runs it on every push.</p>
+
+    <p>A workflow has:</p>
+
+    <ul>
+      <li><strong>Triggers</strong> - When to run (on push, on pull request, on schedule, etc.)</li>
+      <li><strong>Jobs</strong> - What to do (run tests, build, deploy, etc.)</li>
+      <li><strong>Steps</strong> - Individual commands within a job</li>
+      <li><strong>Matrix</strong> - Run the same job with different configurations (e.g., multiple Node.js versions)</li>
+    </ul>
+
+    <h2 id="github-actions">7. Creating the GitHub Actions Workflow</h2>
+
+    <p>We created <code>.github/workflows/tests.yml</code>:</p>
+
+    <pre><code data-lang="yaml">name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Self-test
+        run: node self-test.js
+
+      - name: Integration tests
+        run: npm run test:integration</code></pre>
+
+    <h3>Line-by-line explanation</h3>
+
+    <p><strong><code>name: Tests</code></strong> - The name that appears in the GitHub Actions UI.</p>
+
+    <p><strong><code>on: push: branches: [main]</code></strong> - Run this workflow on every push to the main branch. Also runs on pull requests targeting main.</p>
+
+    <p><strong><code>runs-on: ubuntu-latest</code></strong> - Use a fresh Ubuntu virtual machine. GitHub provides these for free. Every run starts from a clean machine with no pre-installed project dependencies.</p>
+
+    <p><strong><code>strategy: matrix: node-version: [20, 22, 24]</code></strong> - Run the tests three times: once on Node.js 20, once on 22, once on 24. This catches compatibility issues. We chose these versions because Node 18 is end-of-life (EOL).</p>
+
+    <p><strong><code>actions/checkout@v4</code></strong> - Checks out your repository code onto the virtual machine. Without this, the VM is empty.</p>
+
+    <p><strong><code>actions/setup-node@v4</code></strong> - Installs the specified Node.js version.</p>
+
+    <p><strong><code>npm ci --legacy-peer-deps</code></strong> - Installs dependencies. More on this in the failure sections below.</p>
+
+    <p><strong><code>node self-test.js</code></strong> - Runs the self-test (25 assertions).</p>
+
+    <p><strong><code>npm run test:integration</code></strong> - Runs the integration tests (22 tests).</p>
+
+    <h3>The README badge</h3>
+
+    <p>We added a badge to the README that dynamically shows the CI status:</p>
+
+    <pre><code data-lang="markdown">[![Tests](https://github.com/ImsirovicAjdin/everystate-vue/actions/workflows/tests.yml/badge.svg)](https://github.com/ImsirovicAjdin/everystate-vue/actions/workflows/tests.yml)</code></pre>
+
+    <p>When tests pass, it shows a green "passing" badge. When they fail, it shows a red "failing" badge. It updates automatically on every push.</p>
+
+    <h2 id="failure-1">8. CI Failure #1: Missing Dependencies</h2>
+
+    <h3>What happened (v1.0.3)</h3>
+
+    <p>The first CI run failed immediately:</p>
+
+    <pre><code data-lang="text">Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@everystate/core'
+imported from /home/runner/work/everystate-vue/everystate-vue/self-test.js</code></pre>
+
+    <h3>Why it failed</h3>
+
+    <p>The <code>self-test.js</code> file imports <code>@everystate/core</code>, but that package was only listed as a <code>peerDependency</code> with a local file path:</p>
+
+    <pre><code data-lang="json">"peerDependencies": {
+  "@everystate/core": "file:../everystate-core",
+  "vue": ">=3.0.0"
+}</code></pre>
+
+    <p>Two problems:</p>
+
+    <ol>
+      <li><strong><code>file:../everystate-core</code></strong> - This is a local file path that only works on the developer's machine. In CI, there is no <code>../everystate-core</code> folder. The GitHub Actions VM only has the <code>everystate-vue</code> repository checked out.</li>
+      <li><strong>Peer dependencies are not automatically installed</strong> - In npm, peer dependencies are packages that the <em>user</em> of your library is expected to install. npm does not guarantee they'll be available in dev/test environments.</li>
+    </ol>
+
+    <h3>What are dependencies, devDependencies, and peerDependencies?</h3>
+
+    <ul>
+      <li><strong><code>dependencies</code></strong> - Packages your code needs at runtime. Installed when a user does <code>npm install your-package</code>.</li>
+      <li><strong><code>devDependencies</code></strong> - Packages needed only for development and testing. NOT installed when a user installs your package. But they ARE installed when you run <code>npm install</code> in the project itself.</li>
+      <li><strong><code>peerDependencies</code></strong> - Packages that the user must install alongside yours. It's a way of saying "I need this, but the user should provide it." Vue is a peer dependency because the user's app already has Vue installed.</li>
+    </ul>
+
+    <h3>The fix (v1.0.4)</h3>
+
+    <p>We changed the <code>peerDependencies</code> to use an npm version range and added <code>@everystate/core</code> to <code>devDependencies</code>:</p>
+
+    <pre><code data-lang="json">"peerDependencies": {
+  "@everystate/core": ">=1.0.0",
+  "vue": ">=3.0.0"
+},
+"devDependencies": {
+  "@everystate/core": "^1.0.0",
+  "@everystate/test": "^1.0.0"
+}</code></pre>
+
+    <p>We also moved <code>npm install</code> BEFORE the self-test step in the workflow. The original workflow ran the self-test first (before installing anything), which obviously couldn't work.</p>
+
+    <h2 id="failure-2">9. CI Failure #2: Peer Dependency Resolution</h2>
+
+    <h3>What happened (v1.0.4)</h3>
+
+    <p>Even after adding <code>@everystate/core</code> to <code>devDependencies</code> and reordering the workflow steps, CI still failed with the same error.</p>
+
+    <h3>Why it failed</h3>
+
+    <p>The <code>npm install</code> step was completing in ~0 seconds - suspiciously fast. The install was failing silently because of <code>vue</code>.</p>
+
+    <p>Here's what happened:</p>
+
+    <ol>
+      <li><code>package.json</code> has <code>"peerDependencies": { "vue": ">=3.0.0" }</code></li>
+      <li>npm v7+ auto-installs peer dependencies by default</li>
+      <li><code>vue</code> is NOT in <code>devDependencies</code>, so npm tries to resolve it from the registry</li>
+      <li>The resolution conflicts, and <strong>the entire install fails</strong></li>
+      <li><code>@everystate/core</code> never gets installed</li>
+    </ol>
+
+    <h3>The fix (v1.0.5)</h3>
+
+    <p>We added <code>--legacy-peer-deps</code> to the npm install command:</p>
+
+    <pre><code data-lang="yaml">- name: Install dependencies
+  run: npm install --legacy-peer-deps</code></pre>
+
+    <p><strong>What does <code>--legacy-peer-deps</code> do?</strong> It tells npm to use the old (npm v6) behavior: don't try to automatically install peer dependencies. Just install what's in <code>dependencies</code> and <code>devDependencies</code>. Since our tests don't need Vue (they only test the store layer), this is the correct approach.</p>
+
+    <h2 id="failure-3">10. CI Failure #3: Stale Lockfile</h2>
+
+    <h3>What happened (v1.0.5)</h3>
+
+    <p>The CI <em>still</em> failed. Even with <code>--legacy-peer-deps</code>, <code>@everystate/core</code> wasn't being installed.</p>
+
+    <h3>What is a lockfile?</h3>
+
+    <p>When you run <code>npm install</code>, npm creates a <code>package-lock.json</code> file. This file records the exact versions of every package that was installed, along with their download URLs and integrity hashes. It serves two purposes:</p>
+
+    <ol>
+      <li><strong>Deterministic installs</strong> - Every developer (and every CI run) installs the exact same versions.</li>
+      <li><strong>Speed</strong> - npm can skip the version resolution step and go straight to downloading.</li>
+    </ol>
+
+    <h3>Why it failed</h3>
+
+    <p>The <code>package-lock.json</code> that was committed to GitHub was <strong>stale</strong>. Here's the timeline:</p>
+
+    <ol>
+      <li>We edited <code>package.json</code> to add <code>@everystate/core</code> to <code>devDependencies</code></li>
+      <li>The commit was pushed immediately</li>
+      <li>But <code>npm install</code> hadn't been run yet to regenerate the lockfile</li>
+      <li>The lockfile on GitHub still had the OLD dependency list (without core)</li>
+      <li>CI used this old lockfile and installed... nothing useful</li>
+    </ol>
+
+    <h3>How we discovered it</h3>
+
+    <p>Running <code>git status</code> after a local <code>npm install</code> showed:</p>
+
+    <pre><code data-lang="text">Changes not staged for commit:
+    modified:   package-lock.json</code></pre>
+
+    <p>This confirmed the lockfile had been regenerated locally but not committed. The lockfile on GitHub was out of date.</p>
+
+    <h2 id="final-fix">11. The Final Fix</h2>
+
+    <p>Three changes together fixed CI for good:</p>
+
+    <ol>
+      <li>Delete <code>node_modules</code> and <code>package-lock.json</code>, run <code>npm install --legacy-peer-deps</code> to regenerate a clean lockfile</li>
+      <li>Commit the updated lockfile alongside the code changes</li>
+      <li>Switch from <code>npm install</code> to <code>npm ci</code> in the workflow</li>
+    </ol>
+
+    <p><strong>What's the difference between <code>npm install</code> and <code>npm ci</code>?</strong></p>
+
+    <ul>
+      <li><strong><code>npm install</code></strong> - Reads <code>package.json</code>, resolves versions, installs packages, and may update <code>package-lock.json</code>.</li>
+      <li><strong><code>npm ci</code></strong> - Reads <code>package-lock.json</code> directly. Fails if the lockfile is out of sync with <code>package.json</code>. Faster and more deterministic. The recommended choice for CI environments.</li>
+    </ul>
+
+    <p>The final <code>package.json</code> at v1.0.6:</p>
+
+    <pre><code data-lang="json">{
+  "peerDependencies": {
+    "@everystate/core": ">=1.0.0",
+    "vue": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@everystate/core": "^1.0.0",
+    "@everystate/test": "^1.0.0"
+  }
+}</code></pre>
+
+    <h2 id="publishing">12. Publishing the Updated Test Runner</h2>
+
+    <p>Because the test output formatting lives in <code>@everystate/test</code> (a separate npm package), updating the output required a multi-step process:</p>
+
+    <ol>
+      <li>Edit <code>everystate-test/eventTest.js</code> with the ANSI formatting code</li>
+      <li>Bump <code>everystate-test/package.json</code> version from 1.0.5 to 1.0.6</li>
+      <li>Commit, tag, and push the test package</li>
+      <li>Publish to npm: <code>npm publish --access public</code></li>
+      <li>Back in <code>everystate-vue</code>: delete <code>node_modules</code> and <code>package-lock.json</code></li>
+      <li>Run <code>npm install --legacy-peer-deps</code> to pull the new <code>@everystate/test@1.0.6</code></li>
+      <li>Commit the updated lockfile in <code>everystate-vue</code></li>
+    </ol>
+
+    <p>This is the nature of a multi-package ecosystem. The dependency chain is:</p>
+
+    <pre><code data-lang="text">@everystate/vue (your app adapter)
+  -> @everystate/test (test runner, devDependency)
+    -> @everystate/core (state library, peerDependency of test)
+  -> @everystate/core (state library, devDependency + peerDependency)</code></pre>
+
+    <p>Any change to <code>@everystate/test</code> requires a publish before <code>@everystate/vue</code> can use it.</p>
+
+    <h2 id="versions">13. Version History</h2>
+
+    <table>
+      <thead>
+        <tr><th>Version</th><th>What changed</th><th>CI status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>v1.0.1</td><td>Initial release with 14 integration tests</td><td>No CI</td></tr>
+        <tr><td>v1.0.2</td><td>Added 8 edge case tests (22 total)</td><td>No CI</td></tr>
+        <tr><td>v1.0.3</td><td>Added GitHub Actions workflow + README badges</td><td style="color:var(--rose)">FAILED: missing @everystate/core</td></tr>
+        <tr><td>v1.0.4</td><td>Added @everystate/core to devDeps, fixed peerDeps</td><td style="color:var(--rose)">FAILED: vue peer dep blocks install</td></tr>
+        <tr><td>v1.0.5</td><td>Added --legacy-peer-deps, ASCII-only chars</td><td style="color:var(--rose)">FAILED: stale lockfile</td></tr>
+        <tr><td>v1.0.6</td><td>Committed lockfile, switched to npm ci, green output</td><td style="color:var(--green)">PASSED</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="lessons">14. Key Lessons Learned</h2>
+
+    <h3>1. Always commit your lockfile</h3>
+    <p>If you change <code>package.json</code>, run <code>npm install</code> and commit the updated <code>package-lock.json</code> in the same commit. A stale lockfile is a silent CI killer.</p>
+
+    <h3>2. Use <code>npm ci</code> in CI, not <code>npm install</code></h3>
+    <p><code>npm ci</code> is faster, stricter, and deterministic. It fails loudly if the lockfile is out of sync, which helps you catch problems early.</p>
+
+    <h3>3. Peer dependencies need special handling in CI</h3>
+    <p>If your package has peer dependencies that aren't needed for testing (like Vue), use <code>--legacy-peer-deps</code> to prevent them from blocking the install.</p>
+
+    <h3>4. Don't use <code>file:</code> paths in published packages</h3>
+    <p><code>file:../everystate-core</code> only works on your local machine. Published packages must use npm version ranges like <code>>=1.0.0</code> or <code>^1.0.0</code>.</p>
+
+    <h3>5. Test output matters</h3>
+    <p>Pretty test output isn't vanity - it's communication. When a reviewer sees green PASS badges grouped by section with a summary bar, they immediately understand the test coverage without reading the code.</p>
+
+    <h3>6. Edge case tests signal maturity</h3>
+    <p>Happy-path tests show your library works. Edge case tests show you've thought about the boundaries. Together, they're what separates a stable package from alpha/beta software.</p>
+
+    <h3>7. CI is a badge of trust</h3>
+    <p>A green CI badge on your README is the single most important signal for open-source credibility. It tells potential users: "This code is tested on every push, on multiple Node.js versions, on a clean machine."</p>
+
+    <h3>8. Non-ASCII characters can cause confusion</h3>
+    <p>We replaced all Unicode characters (em-dashes, arrows, checkmarks, copyright symbols) with ASCII equivalents. This ensures the source files are readable and editable on any system, and avoids encoding issues in CI environments.</p>
+
+    <h3>9. Publish dependencies before dependents</h3>
+    <p>In a multi-package ecosystem, if you change a shared dependency (<code>@everystate/test</code>), you must publish it first, then update and re-lock the dependent package (<code>@everystate/vue</code>). The lockfile pins the exact version, so CI will use whatever version was locked at commit time.</p>
+
+  </div>
+
+  <!-- Post footer -->
+  <div class="post-footer">
+    <a href="/blog/">&larr; Back to all posts</a>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <p>EveryState.js (c) 2024-2026 Ajdin Imsirovic. MIT License.</p>
+</footer>
+
+<!-- Shiki syntax highlighting -->
+<script type="module">
+(async () => {
+  const blocks = [...document.querySelectorAll('pre code[data-lang]')];
+  if (blocks.length === 0) return;
+
+  const { createHighlighter } = await import('https://esm.sh/shiki');
+
+  const themeName = document.documentElement.getAttribute('data-theme') === 'dark'
+    ? 'github-dark'
+    : 'github-light';
+
+  const langs = [...new Set(blocks.map(b => b.dataset.lang).filter(l => l !== 'text'))];
+
+  const highlighter = await createHighlighter({
+    themes: ['github-dark', 'github-light'],
+    langs: langs.length > 0 ? langs : ['javascript']
+  });
+
+  blocks.forEach(block => {
+    const lang = block.dataset.lang;
+    if (lang === 'text') return;
+
+    const code = block.textContent;
+    const pre = block.parentElement;
+    if (!pre || !pre.parentElement) return;
+
+    try {
+      const html = highlighter.codeToHtml(code, { lang, theme: themeName });
+      const wrap = document.createElement('div');
+      wrap.className = 'code-block-wrap';
+      wrap.innerHTML = '<span class="code-lang-label">' + lang + '</span>' + html;
+      pre.parentElement.replaceChild(wrap, pre);
+    } catch (e) {
+      // If highlighting fails for a block, leave it as-is
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

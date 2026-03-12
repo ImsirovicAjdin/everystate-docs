@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog - EveryState.js</title>
+  <meta name="description" content="Engineering notes, tutorials, and updates from the EveryState.js project.">
+  <link rel="stylesheet" href="../style.css">
+  <script src="../theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">EveryState.js</a>
+  <nav>
+    <a href="../tutorial.html">Tutorial</a>
+    <a href="../core.html">Core</a>
+    <a href="../vue.html">Vue</a>
+    <a href="../react.html">React</a>
+    <a href="../ecosystem.html">Ecosystem</a>
+    <a href="/blog/" class="active">Blog</a>
+  </nav>
+  <div class="header-right">
+    <a href="https://github.com/ImsirovicAjdin" class="star-link">GitHub</a>
+    <button id="theme-toggle" onclick="__toggleTheme()" aria-label="Switch theme"></button>
+  </div>
+</header>
+
+<main class="blog-layout">
+
+  <div class="blog-header">
+    <h1>Blog</h1>
+    <p>Engineering notes, tutorials, and lessons learned while building EveryState.js.</p>
+  </div>
+
+  <!-- Tag filter -->
+  <div class="blog-tags" id="tag-filter">
+    <span class="blog-tag active" data-tag="all">All</span>
+    <span class="blog-tag" data-tag="ci">CI</span>
+    <span class="blog-tag" data-tag="testing">Testing</span>
+    <span class="blog-tag" data-tag="npm">npm</span>
+    <span class="blog-tag" data-tag="github-actions">GitHub Actions</span>
+    <span class="blog-tag" data-tag="vue">Vue</span>
+    <span class="blog-tag" data-tag="tutorial">Tutorial</span>
+  </div>
+
+  <!-- Post list -->
+  <div class="blog-posts" id="blog-posts">
+
+    <a href="ci-tutorial.html" class="blog-card" data-tags="ci,testing,npm,github-actions,vue,tutorial">
+      <div class="blog-card-title">How We Got @everystate/vue to Green CI</div>
+      <div class="blog-card-excerpt">
+        The full story of taking a Vue adapter package from basic tests to edge-case coverage,
+        beautiful ANSI test output, and a fully green GitHub Actions pipeline. Three CI failures,
+        three root causes, three fixes.
+      </div>
+      <div class="blog-card-meta">
+        <span>Ajdin Imsirovic</span>
+        <span class="dot">/</span>
+        <span>March 12, 2026</span>
+        <span class="dot">/</span>
+        <span>15 min read</span>
+        <div class="blog-card-tags">
+          <span>CI</span>
+          <span>Testing</span>
+          <span>npm</span>
+          <span>GitHub Actions</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <p>EveryState.js (c) 2024-2026 Ajdin Imsirovic. MIT License.</p>
+</footer>
+
+<script>
+(function () {
+  var tags = document.querySelectorAll('#tag-filter .blog-tag');
+  var cards = document.querySelectorAll('#blog-posts .blog-card');
+
+  tags.forEach(function (tag) {
+    tag.addEventListener('click', function () {
+      var selected = tag.getAttribute('data-tag');
+
+      // Update active state
+      tags.forEach(function (t) { t.classList.remove('active'); });
+      tag.classList.add('active');
+
+      // Filter cards
+      cards.forEach(function (card) {
+        if (selected === 'all') {
+          card.style.display = '';
+          return;
+        }
+        var cardTags = (card.getAttribute('data-tags') || '').split(',');
+        card.style.display = cardTags.indexOf(selected) !== -1 ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
